@@ -1,5 +1,7 @@
 var express = require('express');
+var engine = require('./engine/engine');
 var app = express();
+var http = require('http').Server(app);
 
 app.set('port', (process.env.PORT || 8080));
 
@@ -13,6 +15,8 @@ app.get('/', function(request, response) {
   response.render('index');
 });
 
-app.listen(app.get('port'), function() {
+app.use('/engine', new engine(http));
+
+http.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
