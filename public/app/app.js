@@ -8,6 +8,19 @@ app.directive("game", function(){
       window.onload = showViewport;
       window.onresize = showViewport;
 
+      var ctx = canvas.getContext('2d');
+      var img = new Image();
+      img.src = 'assets/background.jpg';
+      backgroundTile = {};
+
+      img.onload = function() {
+         draw();
+         backgroundTile.width = this.width;
+         backgroundTile.height = this.height;
+      }
+
+     
+
       var drawPattern = function(width, height){
           // create pattern
           var ptrn = ctx.createPattern(img, 'repeat'); // Create a pattern with this image, and set it to "repeat".
@@ -22,16 +35,6 @@ app.directive("game", function(){
         canvas.height = height -20;
         drawPattern(canvas.width , canvas.height);
       }
-
-
-      var ctx = canvas.getContext('2d');
-
-      var img = new Image();
-
-      img.src = 'assets/background.jpg';
-
-
-
 
       // variable that decides if something should be drawn on mousemove
       var drawing = false;
@@ -92,6 +95,7 @@ app.directive("game", function(){
         ctx.strokeStyle = "#4bf";
         // draw it
         ctx.stroke();
+        setTimeout(draw, 100);
       }
     }
   };
