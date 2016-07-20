@@ -4,10 +4,10 @@
   <title>autodesk.io</title>
   <script src = "components/angular/angular.min.js"></script>
   <script src = "app/window.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body ng-app='autodeskio' style="width: 100%; height: 100%; margin: 0; padding: 0; border: 0;">
-<canvas game id="canvas" style="display: block;"> </canvas>
-<script src = "app/app.js">
-</script>
+<canvas game id="canvas" style="display: block;" ng-controller="MainController"> </canvas>
+<script src = "app/app.js"></script>
 </body>
 </html>
