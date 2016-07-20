@@ -1,0 +1,22 @@
+{
+  "name": "autodesk.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonduzyk/autodesk.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/simonduzyk/autodesk.io/issues"
+  },
+  "homepage": "https://github.com/simonduzyk/autodesk.io#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}
