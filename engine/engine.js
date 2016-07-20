@@ -50,8 +50,8 @@ function ApiRouter(server) {
     map.generateProduct();
     emitChange();
     setInterval(function () {
-        if (map.generateProduct())
-            emitChange();
+        //if (map.generateProduct())
+        //    emitChange();
     }, 10000);
 
     return router;

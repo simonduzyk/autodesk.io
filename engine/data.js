@@ -21,7 +21,9 @@ function Map(callback) {
             {
                 "name": "3DS MAX",
                 "img": "3ds_Max_",
-                "description": "Create amazing worlds in 3ds Max"
+                "description": "Create amazing worlds in 3ds Max",
+                "attribute": "size",
+                "value": 10
             }
         ]
     } else {
@@ -152,8 +154,12 @@ Map.prototype.validateItems = function () {
             var obj2 = this.data.items[keysItems[j]];
 
             if (obj1 && obj2 && obj1.coords.equals(obj2.coords, obj1.size + obj2.size)) {
-                obj1.size += obj2.size;
-                this.removeItem(obj2.id);
+                var asset = this.products[obj2.assetId];
+
+                if(asset){
+                    obj1[asset.attribute] += asset.value;
+                    this.removeItem(obj2.id);
+                }
             }
         }
     }
@@ -181,6 +187,7 @@ Item.prototype.move = function (dx, dy) {
 function Player(id, x, y) {
     Item.call(this, id, x, y);
     this.velocity = 1;
+    this.shield = 0;
 }
 
 Player.prototype = Object.create(Item.prototype);
