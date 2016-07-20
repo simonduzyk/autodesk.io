@@ -1,0 +1,18 @@
+{
+  "name": "autodesk.io",
+  "description": "",
+  "main": "server.js",
+  "license": "",
+  "homepage": "https://github.com/simonduzyk/autodesk.io",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.5.7"
+  }
+}
