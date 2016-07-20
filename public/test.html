@@ -63,7 +63,7 @@
      <script>
     var socket = io();
         $('form').submit(function(e){
-            socket.emit('moved',{ dx: +$('#x').val(), dy: +$('#y').val()} );
+            socket.emit('position',{ x: +$('#x').val(), y: +$('#y').val()} );
             $('#m').val('');
             return false;
         });
@@ -72,6 +72,9 @@
         });
         socket.on('yourId', function(msg){
             $('#myId').html(msg);
+        });
+        socket.on('game-over', function(msg){
+            $('#myId').html("GAME OVER");
         });
     </script>
 </body>
