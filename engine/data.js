@@ -1,25 +1,41 @@
 
+var config = {
+    mapWidth: 128*20,
+    itemsMaxCount: 20
+}
+
 function Map() {
-    this.items = {};
-    this.width = 128 * 20;
-    this.height = this.width;
+    this.data = {
+        items : {},
+        players : {},
+        width : config.mapWidth,
+        height : config.mapWidth
+    };
+    this.itemId = 0;
 }
 Map.prototype.addItem = function (item) {
-    this.items[item.id] = item;
+    this.data.items[item.id] = item;
 }
 Map.prototype.removeItem = function (id) {
-    delete this.items[id];
+    delete this.data.items[id];
 }
-Map.prototype.addPlayer = function (id) {
-    var x = Math.floor(Math.random() * this.width);
-    var y = Math.floor(Math.random() * this.height);
+Map.prototype.generateRandomPosition = function(){
+    var x = Math.floor(Math.random() * this.data.width);
+    var y = Math.floor(Math.random() * this.data.height);
 
-    var player = new Player(id, x, y);
-    this.addItem(player);
+    return {x,y};
+}
+Map.prototype.addPlayer = function (id) { 
+    var pt = this.generateRandomPosition();
+    var player = new Player(id, pt.x, pt.y);
+    this.data.players[id] = player;
     return player;
 }
+Map.prototype.removePlayer = function (id) {
+    delete this.data.players[id];
+}
 Map.prototype.getPlayer = function (id) {
-    return this.items[id];
+    return this.data.players[id];
 }
 Map.prototype.movePlayer = function (id, dx, dy) {
     var player = this.getPlayer(id);
@@ -27,29 +43,41 @@ Map.prototype.movePlayer = function (id, dx, dy) {
         player.move(dx, dy);
 
         if (player.coords.x < 0)
-            player.coords.x =  this.width + player.coords.x;
+            player.coords.x =  this.data.width + player.coords.x;
 
-        if (player.coords.x > this.width)
-            player.coords.x = player.coords.x - this.width;
+        if (player.coords.x > this.data.width)
+            player.coords.x = player.coords.x - this.data.width;
 
         if (player.coords.y < 0)
-            player.coords.y = this.height + player.coords.y;
+            player.coords.y = this.data.height + player.coords.y;
 
-        if (player.coords.y > this.height)
-            player.coords.y = player.coords.y - this.height;
+        if (player.coords.y > this.data.height)
+            player.coords.y = player.coords.y - this.data.height;
 
         if (player.coords.x < 0)
-            player.coords.x =  this.width;
+            player.coords.x =  this.data.width;
 
-        if (player.coords.x > this.width)
+        if (player.coords.x > this.data.width)
             player.coords.x = 0;
 
         if (player.coords.y < 0)
-            player.coords.y = this.height;
+            player.coords.y = this.data.height;
 
-        if (player.coords.y > this.height)
+        if (player.coords.y > this.data.height)
             player.coords.y = 0;
     }
+}
+Map.prototype.getItemsCount = function(){
+    return Object.keys(this.data.items).length;
+}
+Map.prototype.generateProduct = function(){
+    if(this.getItemsCount() < config.itemsMaxCount){
+        var pt = this.generateRandomPosition();
+        var product = new Product(this.itemId++, pt.x, pt.y);
+        this.addItem(product);
+        return true;
+    }
+    return false;
 }
 
 function Point(x, y) {
@@ -73,8 +101,9 @@ function Player(id, x, y) {
 Player.prototype = Object.create(Item.prototype);
 Player.prototype.constructor = Player;
 
-function Product(id, x, y) {
+function Product(id,x, y) {
     Item.call(this, id, x, y);
+    this.name = "Revit";
 }
 
 Product.prototype = Object.create(Item.prototype);
