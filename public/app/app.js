@@ -31,8 +31,8 @@ app.directive("game", function(){
         var output=document.getElementById("output");
         var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         var height= Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-        canvas.width = width -15;
-        canvas.height = height -20;
+        canvas.width = width;
+        canvas.height = height;
         drawPattern(canvas.width , canvas.height);
       }
 
