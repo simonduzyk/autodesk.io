@@ -1,4 +1,6 @@
 
+var fs = require("fs");
+
 var config = {
     mapWidth: 128 * 20,
     itemsMaxCount: 20,
@@ -12,6 +14,20 @@ function Map(callback) {
         width: config.mapWidth,
         height: config.mapWidth
     };
+    this.products = fs.readFileSync("./public/assets/assets.json", "utf8");
+
+    if (!this.products) {
+        this.products = [
+            {
+                "name": "3DS MAX",
+                "img": "3ds_Max_",
+                "description": "Create amazing worlds in 3ds Max"
+            }
+        ]
+    } else {
+        this.products = JSON.parse(this.products).products;
+    }
+
     this.itemId = 0;
     this.callback = callback;
 }
@@ -36,7 +52,7 @@ Map.prototype.addPlayer = function (id) {
 }
 Map.prototype.removePlayer = function (id) {
     delete this.data.players[id];
-    if(this.callback){
+    if (this.callback) {
         this.callback("player-delete", id);
     }
 }
@@ -92,7 +108,8 @@ Map.prototype.getItemsCount = function () {
 Map.prototype.generateProduct = function () {
     if (this.getItemsCount() < config.itemsMaxCount) {
         var pt = this.generateRandomPosition();
-        var product = new Product(this.itemId++, pt.x, pt.y);
+        var assetId = Math.floor(Math.random() * this.products.length);
+        var product = new Product(this.itemId++, pt.x, pt.y, assetId);
         this.addItem(product);
         this.validateMap();
         return true;
@@ -163,14 +180,15 @@ Item.prototype.move = function (dx, dy) {
 
 function Player(id, x, y) {
     Item.call(this, id, x, y);
+    this.velocity = 1;
 }
 
 Player.prototype = Object.create(Item.prototype);
 Player.prototype.constructor = Player;
 
-function Product(id, x, y) {
+function Product(id, x, y, assetId) {
     Item.call(this, id, x, y);
-    this.name = "Revit";
+    this.assetId = assetId;
 }
 
 Product.prototype = Object.create(Item.prototype);
