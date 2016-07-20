@@ -6,9 +6,9 @@ function ApiRouter(server) {
 
     var io = socketIO(server);
     var clients = {};
-    var map = new data.Map(function(event, data){
-        if(event === "player-delete"){ 
-            if(clients[data])  
+    var map = new data.Map(function (event, data) {
+        if (event === "player-delete") {
+            if (clients[data])
                 clients[data].emit("game-over")
         }
     });
@@ -21,10 +21,11 @@ function ApiRouter(server) {
     io.on('connection', function (socket) {
         clients[socket.id] = socket;
         socket.emit('yourId', socket.id);
+        socket.emit('assets', map.products);
         map.addPlayer(socket.id);
         emitChange();
         socket.on('moved', function (msg) {
-            map.movePlayer(socket.id, msg.dx, msg.dy);            
+            map.movePlayer(socket.id, msg.dx, msg.dy);
             emitChange();
         });
         socket.on('position', function (msg) {
@@ -36,11 +37,20 @@ function ApiRouter(server) {
             delete clients[socket.id];
             emitChange();
         });
+        socket.on('getAssets', function () {
+            socket.emit('assets', map.products);
+        });
+        socket.on('getMap', function () {
+            socket.emit('map', map.data);
+        });
+        socket.on('getId', function () {
+            socket.emit('yourId', socket.id);
+        });
     });
     map.generateProduct();
     emitChange();
-    setInterval(function(){
-        if(map.generateProduct())
+    setInterval(function () {
+        if (map.generateProduct())
             emitChange();
     }, 10000);
 
