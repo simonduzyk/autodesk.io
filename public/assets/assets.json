@@ -1,0 +1,44 @@
+{
+    "products": [
+        {
+            "name" : "3DS MAX",
+            "img" : "3ds_Max_",
+            "description" : "Create amazing worlds in 3ds Max"
+        },
+        {
+            "name" : "AUTOCAD ARCHITECTURE",
+            "img" : "AutoCAD_Architecture_",
+            "description" : "Streamline architectural design and drafting"
+        },
+        {
+            "name" : "DYNAMO STUDIO",
+            "img" : "Dynamo_Studio_",
+            "description" : "Computational BIM design software"
+        },
+        {
+            "name" : "FUSION 360",
+            "img" : "Fusion_360_",
+            "description" : "Product development has changed. So should the tools."
+        },
+        {
+            "name" : "INVENTOR PROFESSIONAL",
+            "img" : "Inventor_",
+            "description" : "Make great products"
+        },
+        {
+            "name" : "MOLDFLOW FLEX",
+            "img" : "Moldflow_Flex_",
+            "description" : "Plastic injection molding tools for simulation"
+        },
+        {
+            "name" : "REVIT",
+            "img" : "Revit_",
+            "description" : "Design without compromise"
+        },
+        {
+            "name" : "SIMSTUDIO TOOLS",
+            "img" : "SimStudio_",
+            "description" : "Make great products by delivering better designs quickly"
+        }
+    ]
+}
