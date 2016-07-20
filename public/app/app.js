@@ -3,7 +3,35 @@ app.directive("game", function(){
   return {
     restrict: "A",
     link: function(scope, element){
-      var ctx = element[0].getContext('2d');
+      var canvas = element[0];
+
+      window.onload = showViewport;
+      window.onresize = showViewport;
+
+      var drawPattern = function(width, height){
+          // create pattern
+          var ptrn = ctx.createPattern(img, 'repeat'); // Create a pattern with this image, and set it to "repeat".
+          ctx.fillStyle = ptrn;
+          ctx.fillRect(0, 0, width, height); // ctx.fillRect(x, y, width, height);
+      }
+      function showViewport() {
+        var output=document.getElementById("output");
+        var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        var height= Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        canvas.width = width -15;
+        canvas.height = height -20;
+        drawPattern(canvas.width , canvas.height);
+      }
+
+
+      var ctx = canvas.getContext('2d');
+
+      var img = new Image();
+
+      img.src = 'assets/background.jpg';
+
+
+
 
       // variable that decides if something should be drawn on mousemove
       var drawing = false;
