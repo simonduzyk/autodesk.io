@@ -38,11 +38,13 @@ app.directive("game", function (GameState) {
         backgroundTile.height = this.height;
       }
 
-      var drawBackground = function (width, height) {
+      var drawBackground = function (width, height, offset) {
         // create pattern
         var ptrn = ctx.createPattern(img, 'repeat'); // Create a pattern with this image, and set it to "repeat".
         ctx.fillStyle = ptrn;
-        ctx.fillRect(0, 0, width, height); // ctx.fillRect(x, y, width, height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.translate(offset.x%backgroundTile.width, offset.y%backgroundTile.height);
+        ctx.fillRect(0, 0, width + backgroundTile.width, height + backgroundTile.height); // ctx.fillRect(x, y, width, height);
       }
       function showViewport() {
         var output = document.getElementById("output");
@@ -103,27 +105,59 @@ app.directive("game", function (GameState) {
       }
 
       function draw(lX, lY, cX, cY) {
-        drawBackground(canvas.width, canvas.height);
-        // line from
-        ctx.moveTo(lX, lY);
-        // to
-        ctx.lineTo(cX, cY);
-        // color
-        ctx.strokeStyle = "#4bf";
-        // draw it
 
+        var center = { x: 0, y: 0 };
+
+        if (GameState.state.players) {
+          if (GameState.id in GameState.state.players) {
+            var me = GameState.state.players[GameState.id];
+            center = me.coords;
+          }
+        }
+
+        var min = {
+          x: center.x - canvas.width / 2,
+          y: center.y - canvas.y / 2
+        }
+
+        if (min.x < 0) {
+          min.x += GameState.width;
+        }
+
+        if (min.y < 0) {
+          min.y += GameState.height;
+        }
+
+        var max = {
+          x: center.x + canvas.width / 2,
+          y: center.y + canvas.y / 2
+        }
+
+        if (max.x >= GameState.width) {
+          max.x -= GameState.width;
+        }
+
+        if (max.y >= GameState.height) {
+          max.y -= GameState.height;
+        }
+
+        if (GameState.state.items) {
+
+        }
+
+        drawBackground(canvas.width, canvas.height, center);
         // diagnose console
-        ctx.strokeText(GameState.id, 10, 10);
-        console.log(GameState.id);
-        
-        // var center = { x: 0, y: 0 };
-        // if (GameState.id in GameState.state.items) {
-        //   var me = GameState.state.items[GameState.id];
-        //   center = me.coords;
-        // }
+        ctx.strokeText(GameState.id, 10 - center.x, 10 - center.y);
+
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2 - center.x, canvas.height / 2 - center.y, 20, 0, 2 * Math.PI, false);
+        ctx.fillStyle = 'green';
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#003300';
 
         ctx.stroke();
-        setTimeout(draw, 100);
+        setTimeout(draw, 16);
       }
     }
   };
