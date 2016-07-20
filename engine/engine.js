@@ -8,20 +8,30 @@ function ApiRouter(server) {
     var io = socketIO(server);
 
     var router = express.Router();
+
+    function emitChange() {
+        io.emit('change', map.data);
+    }
     io.on('connection', function (socket) {
-        socket.emit('yourId', socket.id);        
+        socket.emit('yourId', socket.id);
         map.addPlayer(socket.id);
-        io.emit('change', map);
+        emitChange();
         socket.on('moved', function (msg) {
-            map.movePlayer(socket.id,msg.dx,msg.dy); 
-            io.emit('change', map);
+            map.movePlayer(socket.id, msg.dx, msg.dy);
+            emitChange();
         });
-        socket.on('disconnect', function(){
-            map.removeItem(socket.id);
-            
-            io.emit('change', map);
+        socket.on('disconnect', function () {
+            map.removePlayer(socket.id);
+
+            emitChange();
         });
     });
+
+    setInterval(function(){
+        if(map.generateProduct())
+            emitChange();
+    }, 1000);
+
     return router;
 }
 
