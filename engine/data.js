@@ -11,9 +11,9 @@ var config = {
     sizeDefault: 20,
     velocityDefault: 1,
     shieldDefault: 0,
-    bulletRangeInterval: 100,
-    bulletDefaultRange: 50,
-    bulletVelocity: 50,
+    bulletRangeInterval: 10,
+    bulletDefaultRange: 500,
+    bulletVelocity: 5,
     bulletsDefault: 4,
 
     sizeDefaultStep: 1,
@@ -271,7 +271,8 @@ Map.prototype.validateBullets = function (inputPlayer) {
     var sendNotify = false;
     for (var keyBull in this.data.bullets) {
         var bullet = this.data.bullets[keyBull];
-        for (var key in playersKeys) {
+        for (var i = 0; i < playersKeys.length; i++) {
+            var key = playersKeys[i];
             var player = this.data.players[key];
 
             if (player && bullet.playerId !== key && player.collision(bullet) && player.shield === 0) {
