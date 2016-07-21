@@ -306,8 +306,8 @@ app.directive("game", function (GameState) {
           if(min.y > center.y && item.coords.y > min.y)
            item.coords.y -= GameState.state.height;
 
-          var x = item.coords.x - center.x + localCenter.x - 25;
-          var y = item.coords.y - center.y + localCenter.y - 25;
+          var x = item.coords.x - center.x + localCenter.x;
+          var y = item.coords.y - center.y + localCenter.y;
           drawBullet(x, y);
         }
 
