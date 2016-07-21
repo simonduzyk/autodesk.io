@@ -227,17 +227,22 @@ app.directive("game", function (GameState) {
         }
         
         ctx.font = '24pt Courier';
+        ctx.fillStyle = "black";
         ctx.textAlign="left";
-        ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
-        ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
+        ctx.fillText('Players: ' + players, 10 + offset.x, 40 + offset.y);
+        ctx.fillText('Items: ' + items, 10 + offset.x, 80 + offset.y);
 
         if (!GameState.isAlive && GameState.killedAtLeastOnce) {
+          ctx.font = '44pt Comic Sans MS';
           ctx.textAlign="center";
-          ctx.strokeText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
+          ctx.fillStyle = "red";
+          ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
         }
         if (!GameState.isAlive) {
+          ctx.font = '44pt Comic Sans MS';
           ctx.textAlign="center";
-          ctx.strokeText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
+          ctx.fillStyle = "green";
+          ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
         }
       }
 
