@@ -19,42 +19,42 @@
             "img" : "Dynamo_Studio_",
             "description" : "Computational BIM design software",
             "attribute": "size",
-            "value": 10
+            "value": 2
         },
         {
             "name" : "FUSION 360",
             "img" : "Fusion_360_",
             "description" : "Product development has changed. So should the tools.",
             "attribute": "size",
-            "value": 10
+            "value": 3
         },
         {
             "name" : "INVENTOR PROFESSIONAL",
             "img" : "Inventor_",
             "description" : "Make great products",
             "attribute": "shield",
-            "value": 3
+            "value": 2
         },
         {
             "name" : "MOLDFLOW FLEX",
             "img" : "Moldflow_Flex_",
             "description" : "Plastic injection molding tools for simulation",
             "attribute": "shield",
-            "value": 4
+            "value": 3
         },
         {
             "name" : "REVIT",
             "img" : "Revit_",
             "description" : "Design without compromise",
             "attribute": "size",
-            "value": 20
+            "value": 4
         },
         {
             "name" : "SIMSTUDIO TOOLS",
             "img" : "SimStudio_",
             "description" : "Make great products by delivering better designs quickly",
             "attribute": "size",
-            "value": 20
+            "value": 3
         }
     ]
 }
