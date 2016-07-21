@@ -9,6 +9,7 @@ app.service('GameState', function () {
   this.center = {x:0, y:0};
   this.assets = [];
   this.loadAssetsCallback;
+  this.playerVelocity = 1;
   
   this.setDraw = function(draw) {
     this.draw = draw;
@@ -29,7 +30,7 @@ app.service('GameState', function () {
     var l = Math.sqrt(dx*dx + dy*dy);
     var dxNorm = dx/l; 
     var dyNorm = dy/l; 
-    socket.emit('moved', {dx: dxNorm*5, dy: dyNorm*5});
+    socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
     setTimeout(that.movePlayer, 25);
   }
 
@@ -149,18 +150,6 @@ app.directive("game", function (GameState) {
         ctx.fill();
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#003300';
-
-        ctx.stroke();
-      }
-
-      function drawItem(centerx, centery, size, color) {
-        ctx.beginPath();
-        ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#003300';
-
         ctx.stroke();
       }
 
@@ -172,6 +161,7 @@ app.directive("game", function (GameState) {
           if (GameState.id in GameState.state.players) {
             var me = GameState.state.players[GameState.id];
             center = me.coords;
+            GameState.playerVelocity = me.velocity;
           }
         }
 
@@ -217,18 +207,17 @@ app.directive("game", function (GameState) {
           var player = GameState.state.players[key];
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
-          drawUser(x, y, 30, player.color);
+          drawUser(x, y, player.size, player.color);
         }
 
         for (var key in GameState.state.products) {
           items++;
           var item = GameState.state.products[key];
-          var x = item.coords.x - center.x + localCenter.x;
-          var y = item.coords.y - center.y + localCenter.y;
+          var x = item.coords.x - center.x + localCenter.x - 25;
+          var y = item.coords.y - center.y + localCenter.y - 25;
           ctx.drawImage(productImages[item.assetId], x, y);
-          //drawItem(x, y, 10, 'yellow');
         }
-
+        
         ctx.font = '24pt Courier';
         ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
         ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
