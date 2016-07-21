@@ -23,7 +23,6 @@ function ApiRouter(server) {
 
     function emitChange() {
         if (map) {
-            console.log(Object.keys(map.data.players));
             io.emit('change', map.data);
         }
     }
@@ -34,6 +33,10 @@ function ApiRouter(server) {
 
         socket.on('moved', function (msg) {
             map.movePlayer(socket.id, msg.dx, msg.dy);
+            emitChange();
+        });
+        socket.on('shoot', function (msg) {
+            map.shoot(socket.id, msg.vx, msg.vy);
             emitChange();
         });
         socket.on('position', function (msg) {

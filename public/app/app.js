@@ -11,6 +11,7 @@ app.service('GameState', function () {
   this.assets = [];
   this.loadAssetsCallback;
   this.playerVelocity = 1;
+  this.direction = {};
   
   this.setDraw = function(draw) {
     this.draw = draw;
@@ -50,6 +51,8 @@ app.service('GameState', function () {
     var l = Math.sqrt(dx*dx + dy*dy);
     var dxNorm = dx/l; 
     var dyNorm = dy/l; 
+    that.direction.x = dxNorm;
+    that.direction.y = dyNorm;
     socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
     setTimeout(that.movePlayer, 25);
   }
@@ -157,10 +160,13 @@ app.directive("game", function (GameState) {
         if (!GameState.isAlive) {
           socket.emit('restart');
         }
+        else {//shoot
+
+        }
         draw();
       });
 
-      function drawUser(centerx, centery, size, color, shield) {
+      function drawUser(centerx, centery, size, color, shield, offset) {
         ctx.beginPath();
         ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
         ctx.fillStyle = color;
@@ -168,6 +174,24 @@ app.directive("game", function (GameState) {
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#003300';
         ctx.stroke();
+
+        ctx.beginPath();
+        var dir = GameState.direction;
+        if('x' in dir)
+        {
+          ctx.translate( centerx, centery);
+          var rot = Math.atan2(dir.x, dir.y);
+          ctx.rotate(-rot +Math.PI/2);
+          ctx.rect(0, -5, size + 0.3*size, 11);
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.translate(-offset.x, -offset.y);
+        }
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#003300';
+        ctx.stroke();
+
         if(shield > 0) {
           ctx.beginPath();
           ctx.arc(centerx, centery, size + size*0.4, 0, 2 * Math.PI, false);
@@ -181,13 +205,14 @@ app.directive("game", function (GameState) {
       function draw() {
 
         var center = { x: 0, y: 0 };
+        var me;
 
         GameState.isAlive = false;
 
         if (GameState.state.players) {
           if (GameState.id in GameState.state.players) {
             GameState.isAlive = true;
-            var me = GameState.state.players[GameState.id];
+            me = GameState.state.players[GameState.id];
             center = me.coords;
             GameState.playerVelocity = me.velocity;
           }
@@ -246,7 +271,7 @@ app.directive("game", function (GameState) {
 
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
-          drawUser(x, y, player.size, player.color, player.shield);
+          drawUser(x, y, player.size, player.color, player.shield, offset);
         }
 
         for (var key in GameState.state.products) {
@@ -274,8 +299,14 @@ app.directive("game", function (GameState) {
         ctx.fillText('Players: ' + players, 10 + offset.x, 40 + offset.y);
         ctx.fillText('Items: ' + items, 10 + offset.x, 80 + offset.y);
         ctx.fillText('Position: ' + Math.round(center.x) + ", " + Math.round(center.y), 10 + offset.x, 120 + offset.y);
-        // ctx.strokeText('Min: ' + Math.round(min.x) + ", " + Math.round(min.y), 10 + offset.x, 160 + offset.y);
-        // ctx.strokeText('Max: ' + Math.round(max.x) + ", " + Math.round(max.y), 10 + offset.x, 200 + offset.y);
+
+        if(me) {
+          ctx.fillText('Speed:  ' + me.velocity, canvas.width - 215 + offset.x, 40 + offset.y);
+          ctx.fillText('Size:  ' + me.size, canvas.width - 215 + offset.x, 80 + offset.y);
+          ctx.fillText('Shield: ' + me.shield, canvas.width - 215 + offset.x, 120 + offset.y);
+          ctx.fillText('Shots:  0', canvas.width - 215 + offset.x, 160 + offset.y);
+        }
+
 
         if (!GameState.isAlive && GameState.killedAtLeastOnce) {
           ctx.font = '44pt Comic Sans MS';

@@ -18,8 +18,8 @@
             "name" : "DYNAMO STUDIO",
             "img" : "Dynamo_Studio_",
             "description" : "Computational BIM design software",
-            "attribute": "size",
-            "value": 2
+            "attribute": "bullets",
+            "value": 4
         },
         {
             "name" : "FUSION 360",
@@ -39,8 +39,7 @@
             "name" : "MOLDFLOW FLEX",
             "img" : "Moldflow_Flex_",
             "description" : "Plastic injection molding tools for simulation",
-            "attribute": "shield",
-            "value": 1
+            "attribute": "bullets",
         },
         {
             "name" : "REVIT",
@@ -53,8 +52,8 @@
             "name" : "SIMSTUDIO TOOLS",
             "img" : "SimStudio_",
             "description" : "Make great products by delivering better designs quickly",
-            "attribute": "size",
-            "value": 3
+            "attribute": "velocity",
+            "value": 7
         }
     ]
 }
