@@ -246,6 +246,10 @@ Map.prototype.shoot = function (playerId, vx, vy) {
     }
 }
 
+Map.prototype.removeBullet = function(id){    
+	delete this.data.bullets[id];
+}
+
 Map.prototype.updateBullets = function () {
     var sendNotify = false;
     for (var keyBull in this.data.bullets) {
@@ -258,7 +262,7 @@ Map.prototype.updateBullets = function () {
             bullet.coords.y += bullet.vy * config.bulletVelocity;
         }
         else {
-            delete this.data.bullets[bullet.id];
+            this.removeBullet(bullet.id);
             sendNotify = true;
         }
     }
@@ -276,7 +280,8 @@ Map.prototype.validateBullets = function (inputPlayer) {
             var player = this.data.players[key];
 
             if (player && bullet.playerId !== key && player.collision(bullet) && player.shield === 0) {
-                this.removePlayer(player.id);
+                this.removePlayer(player.id);                
+                this.removeBullet(bullet.id);
             }
         }
     }
