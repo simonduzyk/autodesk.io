@@ -4,6 +4,7 @@ var socket = io();
 app.service('GameState', function () {
   this.id = '';
   this.state = {};
+  this.isAlive = false;
   this.killedAtLeastOnce = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
@@ -133,9 +134,9 @@ app.directive("game", function (GameState) {
         GameState.mousePosition = {x: currentX, y: currentY};
       });
       element.bind('mouseup', function (event) {
-        console.log(event.clientX);
-        console.log(event.clientY);
-        socket.emit('restart');
+        if (!GameState.isAlive) {
+          socket.emit('restart');
+        }
         draw();
       });
 
@@ -161,11 +162,11 @@ app.directive("game", function (GameState) {
 
         var center = { x: 0, y: 0 };
 
-        var isAlive = false;
+        GameState.isAlive = false;
 
         if (GameState.state.players) {
           if (GameState.id in GameState.state.players) {
-            isAlive = true;
+            GameState.isAlive = true;
             var me = GameState.state.players[GameState.id];
             center = me.coords;
             GameState.playerVelocity = me.velocity;
@@ -174,28 +175,28 @@ app.directive("game", function (GameState) {
 
         var min = {
           x: center.x - canvas.width / 2,
-          y: center.y - canvas.y / 2
+          y: center.y - canvas.height / 2
         }
 
         if (min.x < 0) {
-          min.x += GameState.width;
+          min.x += GameState.state.width;
         }
 
         if (min.y < 0) {
-          min.y += GameState.height;
+          min.y += GameState.state.height;
         }
 
         var max = {
           x: center.x + canvas.width / 2,
-          y: center.y + canvas.y / 2
+          y: center.y + canvas.height / 2
         }
 
-        if (max.x >= GameState.width) {
-          max.x -= GameState.width;
+        if (max.x >= GameState.state.width) {
+          max.x -= GameState.state.width;
         }
 
-        if (max.y >= GameState.height) {
-          max.y -= GameState.height;
+        if (max.y >= GameState.state.height) {
+          max.y -= GameState.state.height;
         }
 
         if (GameState.state.items) {
@@ -212,6 +213,17 @@ app.directive("game", function (GameState) {
         for (var key in GameState.state.players) {
           players++;
           var player = GameState.state.players[key];
+
+          if(max.x < center.x && player.coords.x < max.x)
+           player.coords.x += GameState.state.width;
+          if(max.y < center.y && player.coords.y < max.y)
+           player.coords.y += GameState.state.height;
+
+          if(min.x > center.x && player.coords.x > min.x)
+           player.coords.x -= GameState.state.width;
+          if(min.y > center.y && player.coords.y > min.y)
+           player.coords.y -= GameState.state.height;
+
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
           drawUser(x, y, player.size, player.color, player.shield);
@@ -220,23 +232,42 @@ app.directive("game", function (GameState) {
         for (var key in GameState.state.products) {
           items++;
           var item = GameState.state.products[key];
+
+          if(max.x < center.x && item.coords.x < max.x)
+           item.coords.x += GameState.state.width;
+          if(max.y < center.y && item.coords.y < max.y)
+           item.coords.y += GameState.state.height;
+
+          if(min.x > center.x && item.coords.x > min.x)
+           item.coords.x -= GameState.state.width;
+          if(min.y > center.y && item.coords.y > min.y)
+           item.coords.y -= GameState.state.height;
+
           var x = item.coords.x - center.x + localCenter.x - 25;
           var y = item.coords.y - center.y + localCenter.y - 25;
           ctx.drawImage(productImages[item.assetId], x, y);
         }
         
         ctx.font = '24pt Courier';
+        ctx.fillStyle = "black";
         ctx.textAlign="left";
-        ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
-        ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
+        ctx.fillText('Players: ' + players, 10 + offset.x, 40 + offset.y);
+        ctx.fillText('Items: ' + items, 10 + offset.x, 80 + offset.y);
+        ctx.fillText('Position: ' + Math.round(center.x) + ", " + Math.round(center.y), 10 + offset.x, 120 + offset.y);
+        // ctx.strokeText('Min: ' + Math.round(min.x) + ", " + Math.round(min.y), 10 + offset.x, 160 + offset.y);
+        // ctx.strokeText('Max: ' + Math.round(max.x) + ", " + Math.round(max.y), 10 + offset.x, 200 + offset.y);
 
-        if (!isAlive && GameState.killedAtLeastOnce) {
+        if (!GameState.isAlive && GameState.killedAtLeastOnce) {
+          ctx.font = '44pt Comic Sans MS';
           ctx.textAlign="center";
-          ctx.strokeText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
+          ctx.fillStyle = "red";
+          ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
         }
-        if (!isAlive) {
+        if (!GameState.isAlive) {
+          ctx.font = '44pt Comic Sans MS';
           ctx.textAlign="center";
-          ctx.strokeText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
+          ctx.fillStyle = "green";
+          ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
         }
       }
 
