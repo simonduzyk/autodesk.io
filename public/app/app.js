@@ -4,9 +4,13 @@ var socket = io();
 app.service('GameState', function () {
   this.id = '';
   this.state = {};
+  this.killedAtLeastOnce = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
   this.center = {x:0, y:0};
+  this.assets = [];
+  this.loadAssetsCallback;
+  this.playerVelocity = 1;
   
   this.setDraw = function(draw) {
     this.draw = draw;
@@ -27,13 +31,20 @@ app.service('GameState', function () {
     var l = Math.sqrt(dx*dx + dy*dy);
     var dxNorm = dx/l; 
     var dyNorm = dy/l; 
-    socket.emit('moved', {dx: dxNorm*5, dy: dyNorm*5});
+    socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
     setTimeout(that.movePlayer, 25);
   }
-
   this.movePlayer();
   socket.on('change', this.onChange);
   socket.on('yourId', this.onYourId);
+  socket.on('assets', function () {
+    that.assets = Array.prototype.slice.call(arguments[0]);
+    that.loadAssetsCallback();
+  });
+  socket.on('game-over', function () {
+    that.killedAtLeastOnce = true;
+    that.draw();
+  });
 });
 
 app.directive("game", function (GameState) {
@@ -51,6 +62,17 @@ app.directive("game", function (GameState) {
       var img = new Image();
       img.src = 'assets/background.jpg';
       backgroundTile = {width:0, height:0};
+      var productImages = [];
+      
+      var loadProductImages = function() {
+        for(var i = 0; i < GameState.assets.length; i++) {
+          productImages.push( new Image());
+          productImages[i].src = 'assets/' + GameState.assets[i].img + '50.png';
+        }
+      }
+
+      GameState.loadAssetsCallback = loadProductImages;
+
 
       img.onload = function () {
         backgroundTile.width = this.width;
@@ -112,15 +134,12 @@ app.directive("game", function (GameState) {
         }
         GameState.mousePosition = {x: currentX, y: currentY};
       });
-      // element.bind('mouseup', function (event) {
-      //   // stop drawing
-      //   drawing = false;
-      // });
-
-      // // canvas reset
-      // function reset() {
-      //   element[0].width = element[0].width;
-      // }
+      element.bind('mouseup', function (event) {
+        console.log(event.clientX);
+        console.log(event.clientY);
+        socket.emit('restart');
+        draw();
+      });
 
       function drawUser(centerx, centery, size, color) {
         ctx.beginPath();
@@ -129,18 +148,6 @@ app.directive("game", function (GameState) {
         ctx.fill();
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#003300';
-
-        ctx.stroke();
-      }
-
-      function drawItem(centerx, centery, size, color) {
-        ctx.beginPath();
-        ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#003300';
-
         ctx.stroke();
       }
 
@@ -148,10 +155,14 @@ app.directive("game", function (GameState) {
 
         var center = { x: 0, y: 0 };
 
+        var isAlive = false;
+
         if (GameState.state.players) {
           if (GameState.id in GameState.state.players) {
+            isAlive = true;
             var me = GameState.state.players[GameState.id];
             center = me.coords;
+            GameState.playerVelocity = me.velocity;
           }
         }
 
@@ -197,21 +208,32 @@ app.directive("game", function (GameState) {
           var player = GameState.state.players[key];
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
-          drawUser(x, y, 30, 'green');
+          drawUser(x, y, player.size, player.color);
         }
 
-        for (var key in GameState.state.items) {
+        for (var key in GameState.state.products) {
           items++;
-          var item = GameState.state.items[key];
-          var x = item.coords.x - center.x + localCenter.x;
-          var y = item.coords.y - center.y + localCenter.y;
-          drawItem(x, y, 10, 'yellow');
+          var item = GameState.state.products[key];
+          var x = item.coords.x - center.x + localCenter.x - 25;
+          var y = item.coords.y - center.y + localCenter.y - 25;
+          ctx.drawImage(productImages[item.assetId], x, y);
         }
-
+        
         ctx.font = '24pt Courier';
+        ctx.textAlign="left";
         ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
         ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
+
+        if (!isAlive && GameState.killedAtLeastOnce) {
+          ctx.textAlign="center";
+          ctx.strokeText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
+        }
+        if (!isAlive) {
+          ctx.textAlign="center";
+          ctx.strokeText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
+        }
       }
+
     }
   };
 });

@@ -28,7 +28,7 @@ app.get('/login',
     url += "&client_id=" + config.autodeskConfig.client_id;
     url += "&redirect_uri=" + encodeURIComponent(config.autodeskConfig.oauth_callback);
     url += "&scope=data:read";
-    res.render('login', { autodeskurl: url});
+    res.redirect(url);
     //res.render('login', { autodeskurl: url , githuburl: '/oauth/github'});
   });
 
@@ -54,7 +54,7 @@ app.post('/login',
 
 //app.get('/oauth/adsk', passport.authenticate('adsk', { failureRedirect: '/login' }));
 
-app.get('/oauth/callback',
+app.get('/oauthcallback',
   function (req, res) {
     var body = {
       'client_id': config.autodeskConfig.client_id,
