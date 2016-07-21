@@ -7,7 +7,6 @@ app.service('GameState', function () {
   this.killedAtLeastOnce = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
-  this.center = {x:0, y:0};
   this.assets = [];
   this.loadAssetsCallback;
   this.playerVelocity = 1;
@@ -26,8 +25,8 @@ app.service('GameState', function () {
   }
 
   this.movePlayer = function() {
-    var dx = that.mousePosition.x - that.center.x;
-    var dy = that.mousePosition.y - that.center.y;
+    var dx = that.mousePosition.x - canvas.width / 2;
+    var dy = that.mousePosition.y - canvas.height / 2;
     var l = Math.sqrt(dx*dx + dy*dy);
     var dxNorm = dx/l; 
     var dyNorm = dy/l; 
@@ -100,7 +99,6 @@ app.directive("game", function (GameState) {
         var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
         canvas.width = width;
         canvas.height = height;
-        GameState.center = localCenter;
         draw();
       }
 
@@ -141,7 +139,7 @@ app.directive("game", function (GameState) {
         draw();
       });
 
-      function drawUser(centerx, centery, size, color) {
+      function drawUser(centerx, centery, size, color, shield) {
         ctx.beginPath();
         ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
         ctx.fillStyle = color;
@@ -149,6 +147,14 @@ app.directive("game", function (GameState) {
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#003300';
         ctx.stroke();
+        if(shield > 0) {
+          ctx.beginPath();
+          ctx.arc(centerx, centery, size + size*0.4, 0, 2 * Math.PI, false);
+          var shieldPower = (shield > 5) ? 0.5 : shield * 0.1;
+          shieldPower += 0.2;
+          ctx.fillStyle = "rgba(70, 200, 200,"+ shieldPower + ")";
+          ctx.fill();
+        }
       }
 
       function draw() {
@@ -208,7 +214,7 @@ app.directive("game", function (GameState) {
           var player = GameState.state.players[key];
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
-          drawUser(x, y, player.size, player.color);
+          drawUser(x, y, player.size, player.color, player.shield);
         }
 
         for (var key in GameState.state.products) {
