@@ -64,6 +64,7 @@
         <div id="buttons">          
             <button id="send">Send</button>
             <button id="resume">Restart</button>
+            <button id="shoot">Shoot</button>
         </div>
     </form>
     </div>
@@ -76,6 +77,9 @@
         });
         $("#resume").on('click', function(){
             socket.emit('restart');
+        });
+        $("#shoot").on('click', function(){
+            socket.emit('shoot',{ vx: +$('#x').val(), vy: +$('#y').val() });
         });
         socket.on('change', function(msg){
             $('#messages').append($('<li>').text(JSON.stringify(msg)));
