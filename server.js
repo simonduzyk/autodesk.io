@@ -3,6 +3,7 @@ var engine = require('./engine/engine');
 var app = express();
 var http = require('http').Server(app);
 var request = require('request');
+var session = require('express-session');
 
 var config = require('./lib/config');
 var util = require('./lib/utility');
@@ -10,6 +11,7 @@ var util = require('./lib/utility');
 app.set('port', (process.env.PORT || 8080));
 
 app.use(express.static(__dirname + '/public'));
+app.use(session({ secret: 'imr8k793jd73k6' }));
 
 
 //// views is directory for all template files
@@ -32,27 +34,6 @@ app.get('/login',
     //res.render('login', { autodeskurl: url , githuburl: '/oauth/github'});
   });
 
-app.post('/login',
-  function (req, res) {
-    var username = req.body.username;
-    var password = req.body.password;
-
-    new User({ username: username }).fetch().then(function (user) {
-      if (!user) {
-        res.redirect('/login');
-      } else {
-        user.comparePasswords(password, function (theSame) {
-          if (theSame) {
-            util.createSession(req, res, user);
-          } else {
-            res.redirect('/login');
-          }
-        })
-      }
-    })
-  });
-
-//app.get('/oauth/adsk', passport.authenticate('adsk', { failureRedirect: '/login' }));
 
 app.get('/oauthcallback',
   function (req, res) {
@@ -68,9 +49,7 @@ app.get('/oauthcallback',
       url: config.autodeskConfig.get_token_url,
       form: body
     }, function (err, response, body) {
-      if (err) {
-        res.redirect('/login');
-      } else {
+      if (JSON.parse(body).access_token) {
         request.get({
           url: config.autodeskConfig.get_user_url,
           headers: { Authorization: 'Bearer ' + JSON.parse(body).access_token }
@@ -81,6 +60,8 @@ app.get('/oauthcallback',
             util.createSession(req, res, JSON.parse(body).userName);
           }
         });
+      } else {
+        res.redirect('/login');
       }
     });
   });
