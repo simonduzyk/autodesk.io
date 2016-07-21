@@ -140,14 +140,12 @@ Map.prototype.validateMap = function (player) {
 }
 
 Map.prototype.playerVsPlayer = function (player1, player2) {
-    if (player1 && player2 && player1.collision(player2)) {
-        if (player1.size >= player2.size) {
-            player1.size += player2.size;
-            this.removePlayer(player2.id);
-        }
-        else if (player1.size < player2.size) {
-            player2.size += player1.size;
-            this.removePlayer(player1.id);
+    if (player1 && player2 && player1.collision(player2) && player1.size !== player2.size) {
+        var attacker = (player1.size > player2.size) ? player1:player2;
+        var prey = (player1.size > player2.size) ? player2:player1;        
+        if(prey.shield === 0){
+            attacker.size += prey.size;
+            this.removePlayer(prey.id);
         }
     }
 }
