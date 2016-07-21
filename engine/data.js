@@ -299,7 +299,7 @@ Item.prototype.move = function (dx, dy) {
     this.coords.y += dy;
 }
 Item.prototype.collision = function (item) {
-    return this.coords.equals(item.coords, this.size / 2 + item.size / 2)
+    return this.coords.equals(item.coords, this.size + item.size);
 }
 
 function Player(id, x, y) {

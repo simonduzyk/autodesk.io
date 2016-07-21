@@ -56,8 +56,8 @@ app.service('GameState', function () {
     socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
     setTimeout(that.movePlayer, 25);
   }
-  this.shoot = function() {
-    socket.emit('shoot', {vx: 1, vy: 0});
+  this.shoot = function(vx, vy) {
+    socket.emit('shoot', {vx: vx, vy: vy});
   }
   this.movePlayer();
   socket.on('change', this.onChange);
@@ -146,9 +146,11 @@ app.directive("game", function (GameState) {
           socket.emit('restart');
         }
         else if(bullets > 0){//shoot
-          GameState.shoot();
-          console.log("shoot");
-          bullets --;
+          var dir = GameState.direction;
+          if('x' in dir) {
+            GameState.shoot(dir.x, dir.y);
+            bullets --;
+          }
         }
         draw();
       });
@@ -185,6 +187,16 @@ app.directive("game", function (GameState) {
           ctx.fillStyle = "rgba(70, 200, 200,"+ shieldPower + ")";
           ctx.fill();
         }
+      }
+
+      function drawBullet(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, 2 * Math.PI, false);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#003300';
+        ctx.stroke();     
       }
 
       function draw() {
@@ -280,6 +292,25 @@ app.directive("game", function (GameState) {
           var y = item.coords.y - center.y + localCenter.y - 25;
           ctx.drawImage(productImages[item.assetId], x, y);
         }
+
+        for (var key in GameState.state.bullets) {
+          var item = GameState.state.bullets[key];
+
+          if(max.x < center.x && item.coords.x < max.x)
+           item.coords.x += GameState.state.width;
+          if(max.y < center.y && item.coords.y < max.y)
+           item.coords.y += GameState.state.height;
+
+          if(min.x > center.x && item.coords.x > min.x)
+           item.coords.x -= GameState.state.width;
+          if(min.y > center.y && item.coords.y > min.y)
+           item.coords.y -= GameState.state.height;
+
+          var x = item.coords.x - center.x + localCenter.x - 25;
+          var y = item.coords.y - center.y + localCenter.y - 25;
+          drawBullet(x, y);
+        }
+
         
         ctx.font = '24pt  "Orbitron"';
         ctx.fillStyle = "rgb(0,100,0)";
