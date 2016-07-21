@@ -275,7 +275,7 @@ Map.prototype.validateBullets = function (inputPlayer) {
             var player = this.data.players[key];
 
             if (player && bullet.playerId !== key && player.collision(bullet) && player.shield === 0) {
-                this.removePlayer(player);
+                this.removePlayer(player.id);
             }
         }
     }
