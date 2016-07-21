@@ -7,7 +7,6 @@ app.service('GameState', function () {
   this.killedAtLeastOnce = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
-  this.center = {x:0, y:0};
   this.assets = [];
   this.loadAssetsCallback;
   this.playerVelocity = 1;
@@ -26,8 +25,8 @@ app.service('GameState', function () {
   }
 
   this.movePlayer = function() {
-    var dx = that.mousePosition.x - that.center.x;
-    var dy = that.mousePosition.y - that.center.y;
+    var dx = that.mousePosition.x - canvas.width / 2;
+    var dy = that.mousePosition.y - canvas.height / 2;
     var l = Math.sqrt(dx*dx + dy*dy);
     var dxNorm = dx/l; 
     var dyNorm = dy/l; 
@@ -100,7 +99,6 @@ app.directive("game", function (GameState) {
         var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
         canvas.width = width;
         canvas.height = height;
-        GameState.center = localCenter;
         draw();
       }
 
