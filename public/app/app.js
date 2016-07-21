@@ -9,6 +9,8 @@ app.service('GameState', function () {
   var that = this;
   this.mousePosition = {x:0, y:0};
   this.center = {x:0, y:0};
+  this.assets = [];
+  this.loadAssetsCallback;
   
   this.setDraw = function(draw) {
     this.draw = draw;
@@ -41,6 +43,13 @@ app.service('GameState', function () {
   this.movePlayer();
   socket.on('change', this.onChange);
   socket.on('yourId', this.onYourId);
+  socket.on('assets', function () {
+    that.assets = Array.prototype.slice.call(arguments[0]);
+    that.loadAssetsCallback();
+  });
+  socket.on('game-over', function () {
+    console.log("you dieded");
+  });
 });
 
 app.directive("game", function (GameState) {
@@ -58,6 +67,17 @@ app.directive("game", function (GameState) {
       var img = new Image();
       img.src = 'assets/background.jpg';
       backgroundTile = {width:0, height:0};
+      var productImages = [];
+      
+      var loadProductImages = function() {
+        for(var i = 0; i < GameState.assets.length; i++) {
+          productImages.push( new Image());
+          productImages[i].src = 'assets/' + GameState.assets[i].img + '50.png';
+        }
+      }
+
+      GameState.loadAssetsCallback = loadProductImages;
+
 
       img.onload = function () {
         backgroundTile.width = this.width;
@@ -199,15 +219,16 @@ app.directive("game", function (GameState) {
           var player = GameState.state.players[key];
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
-          drawUser(x, y, 30, 'green');
+          drawUser(x, y, 30, player.color);
         }
 
-        for (var key in GameState.state.items) {
+        for (var key in GameState.state.products) {
           items++;
-          var item = GameState.state.items[key];
+          var item = GameState.state.products[key];
           var x = item.coords.x - center.x + localCenter.x;
           var y = item.coords.y - center.y + localCenter.y;
-          drawItem(x, y, 10, 'yellow');
+          ctx.drawImage(productImages[item.assetId], x, y);
+          //drawItem(x, y, 10, 'yellow');
         }
 
         ctx.font = '24pt Courier';
