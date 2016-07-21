@@ -41,7 +41,7 @@ function Map(callback) {
                 "description": "Create amazing worlds in 3ds Max",
                 "attribute": "bullets",
                 "value": 10
-            }         
+            }
         ]
     } else {
         this.productAssets = JSON.parse(this.productAssets).products;
@@ -246,23 +246,23 @@ Map.prototype.shoot = function (playerId, vx, vy) {
     }
 }
 
-Map.prototype.updateBullets = function(){
+Map.prototype.updateBullets = function () {
     var sendNotify = false;
     for (var keyBull in this.data.bullets) {
         var bullet = this.data.bullets[keyBull];
         bullet.range--;
 
-        if(bullet.range > 0){
+        if (bullet.range > 0) {
             sendNotify = true;
-            bullet.coords.x += bullet.vx*config.bulletVelocity;
-            bullet.coords.y += bullet.vy*config.bulletVelocity;
+            bullet.coords.x += bullet.vx * config.bulletVelocity;
+            bullet.coords.y += bullet.vy * config.bulletVelocity;
         }
-        else{
+        else {
             delete this.data.bullets[bullet.id];
             sendNotify = true;
         }
     }
-    if(sendNotify)
+    if (sendNotify)
         this.notify("bullet-move");
 }
 
@@ -274,7 +274,7 @@ Map.prototype.validateBullets = function (inputPlayer) {
         for (var key in playersKeys) {
             var player = this.data.players[key];
 
-            if(player && bullet.playerId !== key && player.collision(bullet)){
+            if (player && bullet.playerId !== key && player.collision(bullet) && player.shield === 0) {
                 this.removePlayer(player);
             }
         }
