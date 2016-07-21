@@ -4,6 +4,7 @@ var socket = io();
 app.service('GameState', function () {
   this.id = '';
   this.state = {};
+  this.killedAtLeastOnce = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
   this.center = {x:0, y:0};
@@ -33,7 +34,6 @@ app.service('GameState', function () {
     socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
     setTimeout(that.movePlayer, 25);
   }
-
   this.movePlayer();
   socket.on('change', this.onChange);
   socket.on('yourId', this.onYourId);
@@ -42,7 +42,8 @@ app.service('GameState', function () {
     that.loadAssetsCallback();
   });
   socket.on('game-over', function () {
-    console.log("you dieded");
+    that.killedAtLeastOnce = true;
+    that.draw();
   });
 });
 
@@ -133,15 +134,12 @@ app.directive("game", function (GameState) {
         }
         GameState.mousePosition = {x: currentX, y: currentY};
       });
-      // element.bind('mouseup', function (event) {
-      //   // stop drawing
-      //   drawing = false;
-      // });
-
-      // // canvas reset
-      // function reset() {
-      //   element[0].width = element[0].width;
-      // }
+      element.bind('mouseup', function (event) {
+        console.log(event.clientX);
+        console.log(event.clientY);
+        socket.emit('restart');
+        draw();
+      });
 
       function drawUser(centerx, centery, size, color) {
         ctx.beginPath();
@@ -157,8 +155,11 @@ app.directive("game", function (GameState) {
 
         var center = { x: 0, y: 0 };
 
+        var isAlive = false;
+
         if (GameState.state.players) {
           if (GameState.id in GameState.state.players) {
+            isAlive = true;
             var me = GameState.state.players[GameState.id];
             center = me.coords;
             GameState.playerVelocity = me.velocity;
@@ -219,9 +220,20 @@ app.directive("game", function (GameState) {
         }
         
         ctx.font = '24pt Courier';
+        ctx.textAlign="left";
         ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
         ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
+
+        if (!isAlive && GameState.killedAtLeastOnce) {
+          ctx.textAlign="center";
+          ctx.strokeText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
+        }
+        if (!isAlive) {
+          ctx.textAlign="center";
+          ctx.strokeText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
+        }
       }
+
     }
   };
 });
