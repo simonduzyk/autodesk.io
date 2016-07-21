@@ -37,6 +37,9 @@ app.service('GameState', function () {
     socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
     setTimeout(that.movePlayer, 25);
   }
+  this.shoot = function() {
+    socket.emit('shoot', {vx: 1, vy: 0});
+  }
   this.movePlayer();
   socket.on('change', this.onChange);
   socket.on('yourId', this.onYourId);
@@ -105,6 +108,7 @@ app.directive("game", function (GameState) {
         canvas.height = height;
         draw();
       }
+      var bullets = 0;
 
       element.bind('mousemove', function (event) {
         var currentX, currentY;
@@ -121,13 +125,15 @@ app.directive("game", function (GameState) {
         if (!GameState.isAlive) {
           socket.emit('restart');
         }
-        else {//shoot
-
+        else if(bullets > 0){//shoot
+          GameState.shoot();
+          console.log("shoot");
+          bullets --;
         }
         draw();
       });
 
-      function drawUser(centerx, centery, size, color, shield, offset) {
+      function drawUser(centerx, centery, size, color, shield, offset, dirx, diry) {
         ctx.beginPath();
         ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
         ctx.fillStyle = color;
@@ -137,16 +143,14 @@ app.directive("game", function (GameState) {
         ctx.stroke();
 
         ctx.beginPath();
-        var dir = GameState.direction;
-        if('x' in dir)
-        {
-          ctx.translate( centerx, centery);
-          var rot = Math.atan2(dir.x, dir.y);
-          ctx.rotate(-rot +Math.PI/2);
-          ctx.rect(0, -5, size + 0.3*size, 11);
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.translate(-offset.x, -offset.y);
-        }
+
+        ctx.translate( centerx, centery);
+        var rot = Math.atan2(dirx, diry);
+        ctx.rotate(-rot +Math.PI/2);
+        ctx.rect(0, -5, size + 0.3*size, 11);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.translate(-offset.x, -offset.y);
+        
         ctx.fillStyle = color;
         ctx.fill();
         ctx.lineWidth = 5;
@@ -176,6 +180,7 @@ app.directive("game", function (GameState) {
             me = GameState.state.players[GameState.id];
             center = me.coords;
             GameState.playerVelocity = me.velocity;
+            bullets = me.bullets;
           }
         }
 
@@ -232,7 +237,9 @@ app.directive("game", function (GameState) {
 
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
-          drawUser(x, y, player.size, player.color, player.shield, offset);
+          //var dir = GameState.direction;
+          
+          drawUser(x, y, player.size, player.color, player.shield, offset, player.dx, player.dy);
         }
 
         for (var key in GameState.state.products) {
@@ -265,7 +272,7 @@ app.directive("game", function (GameState) {
           ctx.fillText('Speed:  ' + me.velocity, canvas.width - 215 + offset.x, 40 + offset.y);
           ctx.fillText('Size:  ' + me.size, canvas.width - 215 + offset.x, 80 + offset.y);
           ctx.fillText('Shield: ' + me.shield, canvas.width - 215 + offset.x, 120 + offset.y);
-          ctx.fillText('Shots:  0', canvas.width - 215 + offset.x, 160 + offset.y);
+          ctx.fillText('Shots: ' + me.bullets, canvas.width - 215 + offset.x, 160 + offset.y);
         }
 
 
