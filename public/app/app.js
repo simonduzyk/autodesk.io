@@ -4,6 +4,8 @@ var socket = io();
 app.service('GameState', function () {
   this.id = '';
   this.state = {};
+  this.started = true;
+  this.killed = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
   this.center = {x:0, y:0};
@@ -30,6 +32,11 @@ app.service('GameState', function () {
     socket.emit('moved', {dx: dxNorm*5, dy: dyNorm*5});
     setTimeout(that.movePlayer, 25);
   }
+
+  socket.on('game-over', function () {
+    that.killed = true;
+    that.draw();
+  });
 
   this.movePlayer();
   socket.on('change', this.onChange);
@@ -112,15 +119,10 @@ app.directive("game", function (GameState) {
         }
         GameState.mousePosition = {x: currentX, y: currentY};
       });
-      // element.bind('mouseup', function (event) {
-      //   // stop drawing
-      //   drawing = false;
-      // });
-
-      // // canvas reset
-      // function reset() {
-      //   element[0].width = element[0].width;
-      // }
+      element.bind('mouseup', function (event) {
+        console.log(event.clientX);
+        console.log(event.clientY);
+      });
 
       function drawUser(centerx, centery, size, color) {
         ctx.beginPath();
@@ -211,7 +213,13 @@ app.directive("game", function (GameState) {
         ctx.font = '24pt Courier';
         ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
         ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
+
+        if (GameState.killed) {
+          ctx.textAlign="center";
+          ctx.strokeText('Game Over!', canvas.width / 2, canvas.height / 2);
+        }
       }
+
     }
   };
 });
