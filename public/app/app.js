@@ -4,10 +4,10 @@ var socket = io();
 app.service('GameState', function () {
   this.id = '';
   this.state = {};
+  this.isAlive = false;
   this.killedAtLeastOnce = false;
   var that = this;
   this.mousePosition = {x:0, y:0};
-  this.center = {x:0, y:0};
   this.assets = [];
   this.loadAssetsCallback;
   this.playerVelocity = 1;
@@ -26,8 +26,8 @@ app.service('GameState', function () {
   }
 
   this.movePlayer = function() {
-    var dx = that.mousePosition.x - that.center.x;
-    var dy = that.mousePosition.y - that.center.y;
+    var dx = that.mousePosition.x - canvas.width / 2;
+    var dy = that.mousePosition.y - canvas.height / 2;
     var l = Math.sqrt(dx*dx + dy*dy);
     var dxNorm = dx/l; 
     var dyNorm = dy/l; 
@@ -100,7 +100,6 @@ app.directive("game", function (GameState) {
         var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
         canvas.width = width;
         canvas.height = height;
-        GameState.center = localCenter;
         draw();
       }
 
@@ -135,7 +134,9 @@ app.directive("game", function (GameState) {
         GameState.mousePosition = {x: currentX, y: currentY};
       });
       element.bind('mouseup', function (event) {
-        socket.emit('restart');
+        if (!GameState.isAlive) {
+          socket.emit('restart');
+        }
         draw();
       });
 
@@ -161,11 +162,11 @@ app.directive("game", function (GameState) {
 
         var center = { x: 0, y: 0 };
 
-        var isAlive = false;
+        GameState.isAlive = false;
 
         if (GameState.state.players) {
           if (GameState.id in GameState.state.players) {
-            isAlive = true;
+            GameState.isAlive = true;
             var me = GameState.state.players[GameState.id];
             center = me.coords;
             GameState.playerVelocity = me.velocity;
@@ -255,11 +256,11 @@ app.directive("game", function (GameState) {
         // ctx.strokeText('Min: ' + Math.round(min.x) + ", " + Math.round(min.y), 10 + offset.x, 160 + offset.y);
         // ctx.strokeText('Max: ' + Math.round(max.x) + ", " + Math.round(max.y), 10 + offset.x, 200 + offset.y);
 
-        if (!isAlive && GameState.killedAtLeastOnce) {
+        if (!GameState.isAlive && GameState.killedAtLeastOnce) {
           ctx.textAlign="center";
           ctx.strokeText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
         }
-        if (!isAlive) {
+        if (!GameState.isAlive) {
           ctx.textAlign="center";
           ctx.strokeText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
         }
