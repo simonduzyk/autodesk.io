@@ -4,29 +4,29 @@
             "name" : "3DS MAX",
             "img" : "3ds_Max_",
             "description" : "Create amazing worlds in 3ds Max",
-            "attribute": "velocity",
-            "value": 5
+            "attribute": "size",
+            "value": 2
         },
         {
             "name" : "AUTOCAD ARCHITECTURE",
             "img" : "AutoCAD_Architecture_",
             "description" : "Streamline architectural design and drafting",
-            "attribute": "velocity",
-            "value": 6
+            "attribute": "bullets",
+            "value": 3
         },
         {
             "name" : "DYNAMO STUDIO",
             "img" : "Dynamo_Studio_",
             "description" : "Computational BIM design software",
-            "attribute": "bullets",
-            "value": 4
+            "attribute": "size",
+            "value": 3
         },
         {
             "name" : "FUSION 360",
             "img" : "Fusion_360_",
             "description" : "Product development has changed. So should the tools.",
-            "attribute": "size",
-            "value": 3
+            "attribute": "velocity",
+            "value": 5
         },
         {
             "name" : "INVENTOR PROFESSIONAL",
@@ -40,6 +40,7 @@
             "img" : "Moldflow_Flex_",
             "description" : "Plastic injection molding tools for simulation",
             "attribute": "bullets",
+            "value": 2
         },
         {
             "name" : "REVIT",

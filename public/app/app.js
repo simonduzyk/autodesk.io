@@ -26,6 +26,25 @@ app.service('GameState', function () {
     that.id = id;
   }
 
+  this.balloons = 0;
+
+  this.onEaten = function (data) {
+    if (data && data.player === that.id) {
+      console.log(data);
+      $("#balloon").text('Eaten: ' + that.assets[data.product].description);
+      if (that.balloons == 0) {
+        $("#balloon").animate({ opacity: '0.8' }, 1000);
+      }
+      that.balloons += 1;
+      setTimeout(function () {
+        that.balloons -= 1;
+        if (that.balloons == 0) {
+          $("#balloon").animate({ opacity: '0.0' }, 1000);
+        }
+      }, 3000);
+    }
+  }
+
   this.movePlayer = function() {
     var dx = that.mousePosition.x - canvas.width / 2;
     var dy = that.mousePosition.y - canvas.height / 2;
@@ -44,6 +63,7 @@ app.service('GameState', function () {
     that.assets = Array.prototype.slice.call(arguments[0]);
     that.loadAssetsCallback();
   });
+  socket.on('product-eaten', this.onEaten);
   socket.on('game-over', function () {
     that.killedAtLeastOnce = true;
     that.draw();
@@ -106,25 +126,6 @@ app.directive("game", function (GameState) {
         draw();
       }
 
-      // // variable that decides if something should be drawn on mousemove
-      // var drawing = false;
-
-      // // the last coordinates before the current move
-
-      // element.bind('mousedown', function (event) {
-      //   if (event.offsetX !== undefined) {
-      //     lastX = event.offsetX;
-      //     lastY = event.offsetY;
-      //   } else { // Firefox compatibility
-      //     lastX = event.layerX - event.currentTarget.offsetLeft;
-      //     lastY = event.layerY - event.currentTarget.offsetTop;
-      //   }
-
-      //   // begins new line
-      //   ctx.beginPath();
-
-      //   drawing = true;
-      // });
       element.bind('mousemove', function (event) {
         var currentX, currentY;
         if (event.offsetX !== undefined) {

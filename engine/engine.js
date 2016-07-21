@@ -12,8 +12,8 @@ function ApiRouter(server) {
                 clients[data].emit("game-over");
         }
         else if (event === "product-eaten") {
-            if (clients[data])
-                clients[data].emit(event, data);
+            if (clients[data.player])
+                clients[data.player].emit(event, data);
         } else {
             emitChange();
         }
