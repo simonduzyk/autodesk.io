@@ -133,6 +133,17 @@ app.directive("game", function (GameState) {
         ctx.stroke();
       }
 
+      function drawItem(centerx, centery, size, color) {
+        ctx.beginPath();
+        ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#003300';
+
+        ctx.stroke();
+      }
+
       function draw() {
 
         var center = { x: 0, y: 0 };
@@ -177,17 +188,29 @@ app.directive("game", function (GameState) {
         var offset = getOffset(center);
 
         drawBackground(canvas.width, canvas.height, offset);
-        // diagnose console
-        ctx.strokeText(GameState.id, 10 + offset.x, 10 + offset.y);
 
         localCenter = { x: canvas.width / 2 + offset.x, y: canvas.height / 2 + offset.y};
-        for(var key in GameState.state.players) {
+        var players = 0;
+        var items = 0;
+        for (var key in GameState.state.players) {
+          players++;
           var player = GameState.state.players[key];
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
           drawUser(x, y, 30, 'green');
         }
-        //setTimeout(draw, 16);
+
+        for (var key in GameState.state.items) {
+          items++;
+          var item = GameState.state.items[key];
+          var x = item.coords.x - center.x + localCenter.x;
+          var y = item.coords.y - center.y + localCenter.y;
+          drawItem(x, y, 10, 'yellow');
+        }
+
+        ctx.font = '24pt Courier';
+        ctx.strokeText('Players: ' + players, 10 + offset.x, 40 + offset.y);
+        ctx.strokeText('Items: ' + items, 10 + offset.x, 80 + offset.y);
       }
     }
   };
