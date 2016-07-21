@@ -8,7 +8,7 @@ var session = require('express-session');
 var config = require('./lib/config');
 var util = require('./lib/utility');
 
-app.set('port', (process.env.PORT || 8080));
+app.set('port', (process.env.PORT || 80));
 
 app.use(express.static(__dirname + '/public'));
 app.use(session({ secret: 'imr8k793jd73k6' }));
@@ -19,7 +19,7 @@ app.use(session({ secret: 'imr8k793jd73k6' }));
 //app.set('view engine', 'ejs');
 
 app.get('/', util.checkUser, function(request, response) {
-  response.render('index');
+  response.sendFile(__dirname + '/index.html');
 });
 
 app.get('/login',
