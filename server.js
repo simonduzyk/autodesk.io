@@ -39,6 +39,11 @@ app.get('/signin',
     res.sendFile(__dirname + '/login.html');
   });
 
+app.get('/*',
+  function (req, res) {
+    res.sendFile(__dirname + '/login.html');
+  });
+
 app.get('/oauthcallback',
   function (req, res) {
     var body = {
