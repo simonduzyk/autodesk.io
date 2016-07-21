@@ -126,25 +126,6 @@ app.directive("game", function (GameState) {
         draw();
       }
 
-      // // variable that decides if something should be drawn on mousemove
-      // var drawing = false;
-
-      // // the last coordinates before the current move
-
-      // element.bind('mousedown', function (event) {
-      //   if (event.offsetX !== undefined) {
-      //     lastX = event.offsetX;
-      //     lastY = event.offsetY;
-      //   } else { // Firefox compatibility
-      //     lastX = event.layerX - event.currentTarget.offsetLeft;
-      //     lastY = event.layerY - event.currentTarget.offsetTop;
-      //   }
-
-      //   // begins new line
-      //   ctx.beginPath();
-
-      //   drawing = true;
-      // });
       element.bind('mousemove', function (event) {
         var currentX, currentY;
         if (event.offsetX !== undefined) {
