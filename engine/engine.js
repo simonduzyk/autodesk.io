@@ -55,7 +55,6 @@ function ApiRouter(server) {
             socket.emit('yourId', socket.id);
         });
         socket.on('restart', function () {
-            map.removePlayer(socket.id);
             map.addPlayer(socket.id);
             emitChange();
         })
