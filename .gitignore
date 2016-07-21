@@ -1,3 +1,4 @@
 node_modules
 public/components
+lib/config.js
 .vscode
