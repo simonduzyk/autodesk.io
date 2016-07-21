@@ -306,14 +306,14 @@ app.directive("game", function (GameState) {
           if(min.y > center.y && item.coords.y > min.y)
            item.coords.y -= GameState.state.height;
 
-          var x = item.coords.x - center.x + localCenter.x - 25;
-          var y = item.coords.y - center.y + localCenter.y - 25;
+          var x = item.coords.x - center.x + localCenter.x;
+          var y = item.coords.y - center.y + localCenter.y;
           drawBullet(x, y);
         }
 
         
-        ctx.font = '24pt Courier';
-        ctx.fillStyle = "black";
+        ctx.font = '24pt  "Orbitron"';
+        ctx.fillStyle = "rgb(0,100,0)";
         ctx.textAlign="left";
         ctx.fillText('Players: ' + players, 10 + offset.x, 40 + offset.y);
         ctx.fillText('Items: ' + items, 10 + offset.x, 80 + offset.y);
@@ -328,13 +328,13 @@ app.directive("game", function (GameState) {
 
 
         if (!GameState.isAlive && GameState.killedAtLeastOnce) {
-          ctx.font = '44pt Comic Sans MS';
+          ctx.font = '44pt "Orbitron"';
           ctx.textAlign="center";
           ctx.fillStyle = "red";
           ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
         }
         if (!GameState.isAlive) {
-          ctx.font = '44pt Comic Sans MS';
+          ctx.font = '44pt "Orbitron"';
           ctx.textAlign="center";
           ctx.fillStyle = "green";
           ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
