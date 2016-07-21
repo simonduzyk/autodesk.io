@@ -34,6 +34,10 @@ app.get('/login',
     //res.render('login', { autodeskurl: url , githuburl: '/oauth/github'});
   });
 
+app.get('/signin',
+  function (req, res) {
+    res.sendFile(__dirname + '/login.html');
+  });
 
 app.get('/oauthcallback',
   function (req, res) {
