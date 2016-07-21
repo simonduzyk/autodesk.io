@@ -3,21 +3,21 @@ var fs = require("fs");
 
 var config = {
     mapWidth: 128 * 20,
-    itemsMaxCount: 20,
+    productsMaxCount: 20,
     defaultSize: 20
 }
 
 function Map(callback) {
     this.data = {
-        items: {},
+        products: {},
         players: {},
         width: config.mapWidth,
         height: config.mapWidth
     };
-    this.products = fs.readFileSync("./public/assets/assets.json", "utf8");
+    this.productAssets = fs.readFileSync("./public/assets/assets.json", "utf8");
 
-    if (!this.products) {
-        this.products = [
+    if (!this.productAssets) {
+        this.productAssets = [
             {
                 "name": "3DS MAX",
                 "img": "3ds_Max_",
@@ -27,17 +27,17 @@ function Map(callback) {
             }
         ]
     } else {
-        this.products = JSON.parse(this.products).products;
+        this.productAssets = JSON.parse(this.productAssets).products;
     }
 
-    this.itemId = 0;
+    this.productId = 0;
     this.callback = callback;
 }
-Map.prototype.addItem = function (item) {
-    this.data.items[item.id] = item;
+Map.prototype.addProduct = function (product) {
+    this.data.products[product.id] = product;
 }
-Map.prototype.removeItem = function (id) {
-    delete this.data.items[id];
+Map.prototype.removeProduct = function (id) {
+    delete this.data.products[id];
 }
 Map.prototype.generateRandomPosition = function () {
     var x = Math.floor(Math.random() * this.data.width);
@@ -49,7 +49,7 @@ Map.prototype.addPlayer = function (id) {
     var pt = this.generateRandomPosition();
     var player = new Player(id, pt.x, pt.y);
     this.data.players[id] = player;
-    this.validateMap();
+    this.validateMap(player);
     return player;
 }
 Map.prototype.removePlayer = function (id) {
@@ -92,7 +92,7 @@ Map.prototype.movePlayer = function (id, dx, dy) {
             player.coords.y = player.coords.y - this.data.height;
 
         this.validatePlayerPosition(player);
-        this.validateMap();
+        this.validateMap(player);
     }
 }
 Map.prototype.setPlayerPosition = function (id, x, y) {
@@ -101,69 +101,77 @@ Map.prototype.setPlayerPosition = function (id, x, y) {
         player.coords.x = x;
         player.coords.y = y;
         this.validatePlayerPosition(player);
-        this.validateMap();
+        this.validateMap(player);
     }
 }
-Map.prototype.getItemsCount = function () {
-    return Object.keys(this.data.items).length;
+Map.prototype.getProductsCount = function () {
+    return Object.keys(this.data.products).length;
 }
 Map.prototype.generateProduct = function () {
-    if (this.getItemsCount() < config.itemsMaxCount) {
+    if (this.getProductsCount() < config.productsMaxCount) {
         var pt = this.generateRandomPosition();
-        var assetId = Math.floor(Math.random() * this.products.length);
-        var product = new Product(this.itemId++, pt.x, pt.y, assetId);
-        this.addItem(product);
-        this.validateMap();
+        var assetId = Math.floor(Math.random() * this.productAssets.length);
+        var product = new Product(this.productId++, pt.x, pt.y, assetId);
+        this.addProduct(product);
+        this.validateProducts();
         return true;
     }
     return false;
 }
-Map.prototype.validateMap = function () {
-    this.validateItems();
-    this.validatePlayers();
+Map.prototype.validateMap = function (player) {
+    this.validateProducts(player);
+    this.validatePlayers(player);
 }
-Map.prototype.validatePlayers = function () {
+
+Map.prototype.playerVsPlayer = function (player1, player2) {
+    if (player1 && player2 && player1.collision(player2)) {
+        if (player1.size >= player2.size) {
+            player1.size += player2.size;
+            this.removePlayer(player2.id);
+        }
+        else if (player1.size < player2.size) {
+            player2.size += player1.size;
+            this.removePlayer(player1.id);
+        }
+    }
+}
+
+Map.prototype.playerVsProduct = function (player, product) {
+    if (player && product && player.collision(product)) {
+        var asset = this.productAssets[product.assetId];
+
+        if (asset) {
+            player[asset.attribute] += asset.value;
+            this.removeProduct(product.id);
+        }
+    }
+}
+
+Map.prototype.validatePlayers = function (player) {
     var keys = Object.keys(this.data.players);
 
-    for (var i = 0; i < keys.length; i++) {
-        for (var j = i + 1; j < keys.length; j++) {
-            var obj1 = this.data.players[keys[i]];
-            var obj2 = this.data.players[keys[j]];
-
-            if (obj1 && obj2 && obj1.coords.equals(obj2.coords, obj1.size + obj2.size)) {
-                if (obj1.size >= obj2.size) {
-                    obj1.size += obj2.size;
-                    this.removePlayer(obj2.id);
-                }
-                else if (obj1.size < obj2.size) {
-                    obj2.size += obj1.size;
-                    this.removePlayer(obj1.id);
-                }
+    if(player){
+        for (var i = 0; i < keys.length; i++) {
+            if(keys[i] != player.id)
+                this.playerVsPlayer(this.data.players[keys[i]],player);            
+        }
+    } else {
+        for (var i = 0; i < keys.length; i++) {
+            for (var j = i + 1; j < keys.length; j++) {
+                this.playerVsPlayer(this.data.players[keys[i]],this.data.players[keys[j]]);
             }
         }
     }
 }
 
-Map.prototype.validateItems = function () {
-    var keys = Object.keys(this.data.players);
-    var keysItems = Object.keys(this.data.items);
+Map.prototype.validateProducts = function (player) {
+    var playersKeys = player ? [player.id] : Object.keys(this.data.players);
 
-    for (var i = 0; i < keys.length; i++) {
-        for (var j = 0; j < keysItems.length; j++) {
-            var obj1 = this.data.players[keys[i]];
-            var obj2 = this.data.items[keysItems[j]];
-
-            if (obj1 && obj2 && obj1.coords.equals(obj2.coords, obj1.size + obj2.size)) {
-                var asset = this.products[obj2.assetId];
-
-                if(asset){
-                    obj1[asset.attribute] += asset.value;
-                    this.removeItem(obj2.id);
-                }
-            }
+    for (var i = 0; i < playersKeys.length; i++) {
+        for (var productKey in this.data.products) {
+           this.playerVsProduct(this.data.players[playersKeys[i]],this.data.products[productKey]);
         }
     }
-
 }
 
 function Point(x, y) {
@@ -183,11 +191,19 @@ Item.prototype.move = function (dx, dy) {
     this.coords.x += dx;
     this.coords.y += dy;
 }
+Item.prototype.collision = function(item){
+    return this.coords.equals(item.coords, this.size/2 + item.size/2)
+}
 
 function Player(id, x, y) {
     Item.call(this, id, x, y);
     this.velocity = 1;
     this.shield = 0;
+    var letters = '0123456789ABCDEF'.split('');
+    this.color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        this.color += letters[Math.floor(Math.random() * 16)];
+    }
 }
 
 Player.prototype = Object.create(Item.prototype);
