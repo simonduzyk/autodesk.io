@@ -16,12 +16,13 @@ function ApiRouter(server) {
     var router = express.Router();
 
     function emitChange() {
+        console.log(Object.keys(map.data.players));
         io.emit('change', map.data);
     }
     io.on('connection', function (socket) {
         clients[socket.id] = socket;
         socket.emit('yourId', socket.id);
-        socket.emit('assets', map.products);
+        socket.emit('assets', map.productAssets);
         map.addPlayer(socket.id);
         emitChange();
         socket.on('moved', function (msg) {
@@ -38,7 +39,7 @@ function ApiRouter(server) {
             emitChange();
         });
         socket.on('getAssets', function () {
-            socket.emit('assets', map.products);
+            socket.emit('assets', map.productAssets);
         });
         socket.on('getMap', function () {
             socket.emit('map', map.data);
@@ -46,12 +47,17 @@ function ApiRouter(server) {
         socket.on('getId', function () {
             socket.emit('yourId', socket.id);
         });
+        socket.on('restart', function(){
+            map.removePlayer(socket.id);
+            map.addPlayer(socket.id);
+            emitChange();
+        })
     });
     map.generateProduct();
     emitChange();
     setInterval(function () {
-        //if (map.generateProduct())
-        //    emitChange();
+      //  if (map.generateProduct())
+          //  emitChange();
     }, 10000);
 
     return router;
