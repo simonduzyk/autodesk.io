@@ -369,6 +369,7 @@ app.directive("game", function (GameState) {
         
         var rectHeight = 135;
 
+        drawRect(canvas.width - 200 + offset.x, -3 + offset.y, 220, rectHeight - 40, "rgba(0, 0, 0, 0.6)", 5);
         if(me) {
           drawRect(-3 + offset.x, -3 + offset.y, 280, rectHeight, "rgba(0, 0, 0, 0.6)", 5);
           drawRect(145 + offset.x, 19 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
@@ -378,18 +379,21 @@ app.directive("game", function (GameState) {
           var speed = me.velocity*20;
           drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
           drawAmmoGrid(me.bullets, offset);
+        }
+        ctx.font = '24pt  "Orbitron"';
+        ctx.fillStyle = "#47d147";
+        ctx.textAlign="left";
+        ctx.fillText('Players: ' + players, canvas.width - 190 + offset.x, 40 + offset.y);
+        ctx.fillText('Items: ' + items, canvas.width - 190 + offset.x, 80 + offset.y);
+        if(me) {
           ctx.beginPath();
-          ctx.font = '24pt  "Orbitron"';
-          ctx.fillStyle = "rgb(0,200,0)";
-          ctx.textAlign="left";
           ctx.fillText('Health:  ', 10 + offset.x, 40 + offset.y);
           ctx.fillText('Speed:  ', 10 + offset.x, 80 + offset.y);
           ctx.fillText('Ammo: ', 10 + offset.x, 120 + offset.y);
           // if(me.shield > 0)
           //   ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
         }
-        ctx.fillText('Players: ' + players, canvas.width - 215 + offset.x, 40 + offset.y);
-        ctx.fillText('Items: ' + items, canvas.width - 215 + offset.x, 80 + offset.y);
+        
         // ctx.fillText('Position: ' + Math.round(center.x) + ", " + Math.round(center.y), canvas.width - 400 + offset.x, 120 + offset.y);
 
 
