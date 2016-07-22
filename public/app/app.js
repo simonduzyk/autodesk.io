@@ -347,7 +347,7 @@ app.directive("game", function (GameState) {
           var y = player.coords.y - center.y + localCenter.y;
           //var dir = GameState.direction;
           var playerName = "";
-          if(me.id !== player.id) {
+          if(me && (me.id !== player.id)) {
             playerName = player.name;
           }
           drawUser(x, y, player.size, player.color, player.shield, offset, player.dx, player.dy, playerName);
