@@ -2,9 +2,10 @@ var app = angular.module("autodeskio", []);
 var socket = io();
 
 var AttributesDictionary = {
-  bullets: 'Bullets',
-  size: 'Size',
-  velocity: 'Speed'
+  bullets: 'Ammo',
+  size: 'Health',
+  velocity: 'Speed',
+  shield: 'Shield'
 }
 
 app.service('GameState', function () {
@@ -38,7 +39,15 @@ app.service('GameState', function () {
     if (data && data.player === that.id) {
       $('#line1').text('Bonus: ' + that.assets[data.product].name);
       $('#line2').text(that.assets[data.product].description);
-      $('#line3').text(AttributesDictionary[that.assets[data.product].attribute] + ' increased: ' + that.assets[data.product].value);
+      var attribute = AttributesDictionary[that.assets[data.product].attribute];
+      if(attribute === 'Shield')
+        $('#line3').text(attribute + ' activated.');
+      else if(attribute === 'Ammo')
+        $('#line3').text(attribute + ' increased by ' + that.assets[data.product].value + '.');
+      else
+        $('#line3').text(attribute + ' increased.');
+        
+
       if (that.balloons == 0) {
         var canvas = document.getElementById('canvas');
         var baloon = $('#balloon'); 
@@ -176,6 +185,16 @@ app.directive("game", function (GameState) {
           ctx.stroke();
         }
       }
+      function drawRect(x, y, width, height, color, lineWidth) {
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+      }
       function drawUser(centerx, centery, size, color, shield, offset, dirx, diry) {
         drawCircle(centerx, centery, size, color, 5);
 
@@ -304,18 +323,35 @@ app.directive("game", function (GameState) {
           var y = item.coords.y - center.y + localCenter.y;
           drawBullet(x, y);
         }
-
         
+        var rectHeight = 135;
+        // if(me && me.shield > 0)
+        //   rectHeight += 40;
+
+                ctx.beginPath();
+        drawRect(-3 + offset.x, -3 + offset.y, 280, rectHeight, "rgba(0, 0, 0, 0.6)", 5);
+        drawRect(145 + offset.x, 19 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
+        var health = 0;
+        if(me)
+          health = me.size;
+        drawRect(145 + offset.x, 19 + offset.y, health, 20, "rgba(150, 0, 0, 1)", 0);
+        drawRect(145 + offset.x, 60 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
+        var speed = 0;
+        if(me)
+          speed = me.velocity*20;
+        drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
+
+
         ctx.font = '24pt  "Orbitron"';
-        ctx.fillStyle = "rgb(0,100,0)";
+        ctx.fillStyle = "rgb(0,200,0)";
         ctx.textAlign="left";
 
         if(me) {
-          ctx.fillText('Speed:  ' + me.velocity, 10 + offset.x, 40 + offset.y);
-          ctx.fillText('Size:  ' + me.size, 10 + offset.x, 80 + offset.y);
-          ctx.fillText('Shots: ' + me.bullets, 10 + offset.x, 120 + offset.y);
-          if(me.shield > 0)
-            ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
+          ctx.fillText('Health:  ', 10 + offset.x, 40 + offset.y);
+          ctx.fillText('Speed:  ', 10 + offset.x, 80 + offset.y);
+          ctx.fillText('Ammo: ' + me.bullets, 10 + offset.x, 120 + offset.y);
+          // if(me.shield > 0)
+          //   ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
         }
         ctx.fillText('Players: ' + players, canvas.width - 215 + offset.x, 40 + offset.y);
         ctx.fillText('Items: ' + items, canvas.width - 215 + offset.x, 80 + offset.y);
