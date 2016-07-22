@@ -3,7 +3,7 @@ var fs = require("fs");
 
 var config = {
     mapWidth: 128 * 20,
-    productsMaxCount: 20,
+    productsMaxCount: 10,
     productsOnStart: 10,
 
     playerAttributes: ["size", "shield", "velocity"],
@@ -29,7 +29,7 @@ var config = {
     velocityMaxValue: 5,
     shieldMaxValue: 5,
     bulletsMaxValue: 14,
-    
+
     productInterval: 10000
 }
 
@@ -67,7 +67,7 @@ function Map(callback) {
         this.generateProduct();
 
     setInterval(function () {
-        this.generateProduct();
+        this.generateProductInterval();
         this.validatePlayersAttributes();
     }.bind(this), config.productInterval);
 
@@ -156,6 +156,16 @@ Map.prototype.setPlayerPosition = function (id, x, y) {
 Map.prototype.getProductsCount = function () {
     return Object.keys(this.data.products).length;
 }
+Map.prototype.generateProductInterval = function () {
+    var count = 2;
+    if (this.getProductsCount() < 5) {
+        count = 3;
+    }
+
+    for (var i = 0; i < count; i++) {
+        this.generateProduct();
+    }
+}
 Map.prototype.generateProduct = function () {
     if (this.getProductsCount() < config.productsMaxCount) {
         var pt = this.generateRandomPosition();
@@ -178,9 +188,9 @@ Map.prototype.playerVsPlayer = function (player1, player2) {
         var attacker = (player1.size > player2.size) ? player1 : player2;
         var prey = (player1.size > player2.size) ? player2 : player1;
         if (prey.shield === 0) {
-            attacker.size += prey.size;        
-            if(attacker.size > config.sizeMaxValue)
-              attacker.size = config.sizeMaxValue;    
+            attacker.size += prey.size/2;
+            if (attacker.size > config.sizeMaxValue)
+                attacker.size = config.sizeMaxValue;
             this.removePlayer(prey.id);
         }
     }
@@ -192,8 +202,8 @@ Map.prototype.playerVsProduct = function (player, product) {
 
         if (asset) {
             player[asset.attribute] += asset.value * config[asset.attribute + "DefaultStep"];
-            if(player[asset.attribute]>config[asset.attribute + "MaxValue"])
-              player[asset.attribute]=config[asset.attribute + "MaxValue"];
+            if (player[asset.attribute] > config[asset.attribute + "MaxValue"])
+                player[asset.attribute] = config[asset.attribute + "MaxValue"];
             this.notify('product-eaten', { player: player.id, product: product.assetId });
             this.removeProduct(product.id);
         }
@@ -263,7 +273,7 @@ Map.prototype.shoot = function (playerId, vx, vy) {
     if (player && player.bullets > 0) {
         player.bullets--;
         var bullet = new Bullet(this.bulletId++, player.coords.x + player.size * vx, player.coords.y + player.size * vy, vx, vy, config.bulletDefaultRange, player.id);
-        bullet.size=config.bulletSize;
+        bullet.size = config.bulletSize;
         this.data.bullets[bullet.id] = bullet;
     }
 }
@@ -305,10 +315,10 @@ Map.prototype.validateBullets = function (inputPlayer) {
             if (player && bullet.playerId !== key && player.shield === 0 && (player.collision(bullet) || this.isOnLine(prevPoint, bullet.coords, player.coords, bullet.size + player.size))) {
                 player.size -= config.sizeHitCount;
 
-                if(player.size < config.sizeMin){
+                if (player.size < config.sizeMin) {
                     this.removePlayer(player.id);
                 }
-                this.removeBullet(bullet.id);                
+                this.removeBullet(bullet.id);
             }
         }
     }
