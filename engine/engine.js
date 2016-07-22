@@ -1,8 +1,9 @@
 var express = require('express');
 var socketIO = require('socket.io');
 var data = require('./data');
+var session = require("express-session");
 
-function ApiRouter(server) {
+function ApiRouter(server,sessionMiddleware) {
 
     var io = socketIO(server);
     var clients = {};
@@ -23,6 +24,10 @@ function ApiRouter(server) {
 
     var router = express.Router();
 
+    io.use(function(socket, next) {
+        sessionMiddleware(socket.request, socket.request.res, next);
+    });
+
     function emitChange() {
         if (map) {
             io.emit('change', map.data);
@@ -31,6 +36,7 @@ function ApiRouter(server) {
     io.on('connection', function (socket) {
         clients[socket.id] = socket;
         socket.emit('yourId', socket.id);
+        socket.emit('yourName', socket.request.session.user);
         socket.emit('assets', map.productAssets);
 
         socket.on('moved', function (msg) {
@@ -63,6 +69,7 @@ function ApiRouter(server) {
         });
         socket.on('restart', function () {            
             var player = map.addPlayer(socket.id);
+            player.name = socket.request.session.user;//TODO: move to map
             io.emit('player-joined', player);
             emitChange();
         })

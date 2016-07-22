@@ -11,7 +11,8 @@ var util = require('./lib/utility');
 app.set('port', (process.env.PORT || 80));
 
 app.use(express.static(__dirname + '/public'));
-app.use(session({ secret: 'imr8k793jd73k6', saveUninitialized: true, resave: false }));
+var sessionMiddleware = session({ secret: 'imr8k793jd73k6', saveUninitialized: true, resave: false });
+app.use(sessionMiddleware);
 
 app.get('/', util.checkUser, function(request, response) {
   response.sendFile(__dirname + '/index.html');
@@ -71,7 +72,7 @@ app.get('/logout',
   });
 
 
-app.use('/engine', new engine(http));
+app.use('/engine', new engine(http, sessionMiddleware));
 
 app.get('/*',
   function (req, res) {
