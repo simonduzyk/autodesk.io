@@ -8,19 +8,26 @@ var config = {
 
     playerAttributes: ["size", "shield", "velocity"],
 
-    sizeDefault: 20,
-    velocityDefault: 1,
+    sizeDefault: 40,
+    velocityDefault: 2,
     shieldDefault: 0,
     bulletRangeInterval: 10,
     bulletRangeTime: 3000,//for entire map width
     bulletDefaultRange: undefined, //calculated in map
     bulletVelocity: undefined,//calculated in map
-    bulletsDefault: 4,
+    bulletsDefault: 5,
+    bulletSize: 20,
 
     sizeDefaultStep: 1,
     velocityDefaultStep: 0.1,
     shieldDefaultStep: 1,
     bulletsDefaultStep: 1,
+
+    sizeMaxValue: 100,
+    velocityMaxValue: 5,
+    shieldMaxValue: 5,
+    bulletsMaxValue: 16,
+    
     productInterval: 10000
 }
 
@@ -181,6 +188,8 @@ Map.prototype.playerVsProduct = function (player, product) {
 
         if (asset) {
             player[asset.attribute] += asset.value * config[asset.attribute + "DefaultStep"];
+            if(player[asset.attribute]>config[asset.attribute + "MaxValue"])
+              player[asset.attribute]=config[asset.attribute + "MaxValue"];
             this.notify('product-eaten', { player: player.id, product: product.assetId });
             this.removeProduct(product.id);
         }
@@ -250,6 +259,7 @@ Map.prototype.shoot = function (playerId, vx, vy) {
     if (player && player.bullets > 0) {
         player.bullets--;
         var bullet = new Bullet(this.bulletId++, player.coords.x + player.size * vx, player.coords.y + player.size * vy, vx, vy, config.bulletDefaultRange, player.id);
+        bullet.size=config.bulletSize;
         this.data.bullets[bullet.id] = bullet;
     }
 }
