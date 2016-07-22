@@ -8,8 +8,10 @@ function ApiRouter(server) {
     var clients = {};
     var map = new data.Map(function (event, data) {
         if (event === "player-delete") {
-            if (clients[data])
-                clients[data].emit("game-over");
+            if (data && clients[data.id])
+                clients[data.id].emit("game-over");
+
+            io.emit('player-delete', data);
         }
         else if (event === "product-eaten") {
             if (clients[data.player])
@@ -44,6 +46,8 @@ function ApiRouter(server) {
             emitChange();
         });
         socket.on('disconnect', function () {
+            var player = map.getPlayer(socket.id);
+            io.emit('player-left', player);
             map.removePlayer(socket.id);
             delete clients[socket.id];
             emitChange();
@@ -57,8 +61,9 @@ function ApiRouter(server) {
         socket.on('getId', function () {
             socket.emit('yourId', socket.id);
         });
-        socket.on('restart', function () {
-            map.addPlayer(socket.id);
+        socket.on('restart', function () {            
+            var player = map.addPlayer(socket.id);
+            io.emit('player-joined', player);
             emitChange();
         })
     });

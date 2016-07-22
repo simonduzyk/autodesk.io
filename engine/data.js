@@ -88,8 +88,9 @@ Map.prototype.addPlayer = function (id) {
     return player;
 }
 Map.prototype.removePlayer = function (id) {
+    var player = this.data.players[id];
     delete this.data.players[id];
-    this.notify("player-delete", id);
+    this.notify("player-delete", player);
 }
 Map.prototype.getPlayer = function (id) {
     return this.data.players[id];
