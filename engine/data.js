@@ -15,7 +15,7 @@ var config = {
     bulletRangeTime: 3000,//for entire map width
     bulletDefaultRange: undefined, //calculated in map
     bulletVelocity: undefined,//calculated in map
-    bulletsDefault: 3,
+    bulletsDefault: 5,
     bulletSize: 20,
 
     sizeDefaultStep: 1,
@@ -26,7 +26,7 @@ var config = {
     sizeMaxValue: 100,
     velocityMaxValue: 5,
     shieldMaxValue: 5,
-    bulletsMaxValue: 10,
+    bulletsMaxValue: 14,
     
     productInterval: 10000
 }

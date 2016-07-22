@@ -12,7 +12,7 @@
             "img" : "AutoCAD_Architecture_",
             "description" : "Streamline architectural design and drafting",
             "attribute": "bullets",
-            "value": 3
+            "value": 5
         },
         {
             "name" : "DYNAMO STUDIO",
@@ -40,7 +40,7 @@
             "img" : "Moldflow_Flex_",
             "description" : "Plastic injection molding tools for simulation",
             "attribute": "bullets",
-            "value": 2
+            "value": 3
         },
         {
             "name" : "REVIT",
