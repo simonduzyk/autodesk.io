@@ -26,7 +26,7 @@ var config = {
     sizeMaxValue: 100,
     velocityMaxValue: 5,
     shieldMaxValue: 5,
-    bulletsMaxValue: 16,
+    bulletsMaxValue: 14,
     
     productInterval: 10000
 }
