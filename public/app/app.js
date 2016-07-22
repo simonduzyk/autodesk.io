@@ -56,18 +56,21 @@ app.service('GameState', function () {
   }
 
   this.onUserDeleted = function (user) {
-    that.showBaloon('Player killed:', user.name);
-    console.log(user);
+    if (user) {
+      that.showBaloon('Player killed:', user.name);
+    }
   }
 
   this.onUserJoined = function (user) {
-    that.showBaloon('Player joined:', user.name);
-    console.log(user);
+    if (user) {
+      that.showBaloon('Player joined:', user.name);
+    }
   }
 
   this.onUserLeft = function (user) {
-    that.showBaloon('Player left:', user.name);
-    console.log(user);
+    if (user) {
+      that.showBaloon('Player left:', user.name);
+    }
   }
 
   this.onEaten = function (data) {
