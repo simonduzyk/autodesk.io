@@ -3,23 +3,23 @@
         {
             "name" : "3DS MAX",
             "img" : "3ds_Max_",
-            "description" : "Create amazing worlds in 3ds Max",
+            "description" : "Create amazing worlds in 3ds Max.",
             "attribute": "size",
             "value": 5
         },
         {
             "name" : "AUTOCAD ARCHITECTURE",
             "img" : "AutoCAD_Architecture_",
-            "description" : "Streamline architectural design and drafting",
+            "description" : "Streamline architectural design and drafting.",
             "attribute": "bullets",
-            "value": 5
+            "value": 3
         },
         {
             "name" : "DYNAMO STUDIO",
             "img" : "Dynamo_Studio_",
-            "description" : "Computational BIM design software",
+            "description" : "Computational BIM design software.",
             "attribute": "size",
-            "value": 5
+            "value": 7
         },
         {
             "name" : "FUSION 360",
@@ -31,28 +31,28 @@
         {
             "name" : "INVENTOR PROFESSIONAL",
             "img" : "Inventor_",
-            "description" : "Make great products",
+            "description" : "Make great products.",
             "attribute": "shield",
             "value": 2
         },
         {
             "name" : "MOLDFLOW FLEX",
             "img" : "Moldflow_Flex_",
-            "description" : "Plastic injection molding tools for simulation",
+            "description" : "Plastic injection molding tools for simulation.",
             "attribute": "bullets",
-            "value": 3
+            "value": 2
         },
         {
             "name" : "REVIT",
             "img" : "Revit_",
-            "description" : "Design without compromise",
+            "description" : "Design without compromise.",
             "attribute": "size",
             "value": 10
         },
         {
             "name" : "SIMSTUDIO TOOLS",
             "img" : "SimStudio_",
-            "description" : "Make great products by delivering better designs quickly",
+            "description" : "Make great products by delivering better designs quickly.",
             "attribute": "velocity",
             "value": 7
         }

@@ -255,7 +255,7 @@ app.directive("game", function (GameState) {
         ammo = ammoCount > MAX_AMMO ? MAX_AMMO : ammoCount;
         var yOffset = 111 + offset.y;
         if(ammo > AMMO_ROW) {
-          yOffset -= 10;
+          yOffset -= 11;
         }
         for(var i = 0; i < ammo; i++) {      
           drawCircle(150 + offset.x + (i%AMMO_ROW)*15, yOffset, 6, '#fdfd22', 1);
@@ -365,9 +365,6 @@ app.directive("game", function (GameState) {
         }
         
         var rectHeight = 135;
-        // if(me && me.shield > 0)
-        //   rectHeight += 40;
-
 
         if(me) {
           drawRect(-3 + offset.x, -3 + offset.y, 280, rectHeight, "rgba(0, 0, 0, 0.6)", 5);
