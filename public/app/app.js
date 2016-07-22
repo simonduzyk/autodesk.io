@@ -30,16 +30,19 @@ app.service('GameState', function () {
 
   this.onEaten = function (data) {
     if (data && data.player === that.id) {
-      console.log(data);
       $("#balloon").text('Eaten: ' + that.assets[data.product].description);
       if (that.balloons == 0) {
-        $("#balloon").animate({ opacity: '0.8' }, 1000);
+        var canvas = document.getElementById('canvas');
+        var baloon = $('#balloon'); 
+        baloon.animate({ top: canvas.height - baloon.height() }, 500);
       }
       that.balloons += 1;
       setTimeout(function () {
         that.balloons -= 1;
         if (that.balloons == 0) {
-          $("#balloon").animate({ opacity: '0.0' }, 1000);
+          var canvas = document.getElementById('canvas');
+          var baloon = $('#balloon'); 
+          $('#balloon').animate({ top: canvas.height }, 200);
         }
       }, 3000);
     }
