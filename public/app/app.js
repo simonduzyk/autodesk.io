@@ -165,15 +165,19 @@ app.directive("game", function (GameState) {
         }
         draw();
       });
-
-      function drawUser(centerx, centery, size, color, shield, offset, dirx, diry) {
+      function drawCircle (centerx, centery, size, color, lineWidth) {
         ctx.beginPath();
         ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
         ctx.fillStyle = color;
         ctx.fill();
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#003300';
-        ctx.stroke();
+        if(lineWidth > 0) {
+          ctx.lineWidth = lineWidth;
+          ctx.strokeStyle = '#000000';
+          ctx.stroke();
+        }
+      }
+      function drawUser(centerx, centery, size, color, shield, offset, dirx, diry) {
+        drawCircle(centerx, centery, size, color, 5);
 
         ctx.beginPath();
 
@@ -187,27 +191,30 @@ app.directive("game", function (GameState) {
         ctx.fillStyle = color;
         ctx.fill();
         ctx.lineWidth = 5;
-        ctx.strokeStyle = '#003300';
+        ctx.strokeStyle = '#000000';
         ctx.stroke();
 
         if(shield > 0) {
-          ctx.beginPath();
-          ctx.arc(centerx, centery, size + size*0.4, 0, 2 * Math.PI, false);
           var shieldPower = (shield > 5) ? 0.5 : shield * 0.1;
           shieldPower += 0.2;
-          ctx.fillStyle = "rgba(70, 200, 200,"+ shieldPower + ")";
-          ctx.fill();
+          var shColor = "rgba(70, 200, 200,"+ shieldPower + ")";
+          drawCircle(centerx, centery, size + size * 0.4, shColor, 0);
         }
       }
 
       function drawBullet(x, y) {
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, 2 * Math.PI, false);
-        ctx.fillStyle = 'red';
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#003300';
-        ctx.stroke();     
+        drawCircle(x, y, 10, 'red', 2);
+      }
+      function fixCoords(item, center, max, min) {
+          if(max.x < center.x && item.coords.x < max.x)
+           item.coords.x += GameState.state.width;
+          if(max.y < center.y && item.coords.y < max.y)
+           item.coords.y += GameState.state.height;
+
+          if(min.x > center.x && item.coords.x > min.x)
+           item.coords.x -= GameState.state.width;
+          if(min.y > center.y && item.coords.y > min.y)
+           item.coords.y -= GameState.state.height;
       }
 
       function draw() {
@@ -268,15 +275,7 @@ app.directive("game", function (GameState) {
           players++;
           var player = GameState.state.players[key];
 
-          if(max.x < center.x && player.coords.x < max.x)
-           player.coords.x += GameState.state.width;
-          if(max.y < center.y && player.coords.y < max.y)
-           player.coords.y += GameState.state.height;
-
-          if(min.x > center.x && player.coords.x > min.x)
-           player.coords.x -= GameState.state.width;
-          if(min.y > center.y && player.coords.y > min.y)
-           player.coords.y -= GameState.state.height;
+          fixCoords(player, center, max, min)
 
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
@@ -289,15 +288,7 @@ app.directive("game", function (GameState) {
           items++;
           var item = GameState.state.products[key];
 
-          if(max.x < center.x && item.coords.x < max.x)
-           item.coords.x += GameState.state.width;
-          if(max.y < center.y && item.coords.y < max.y)
-           item.coords.y += GameState.state.height;
-
-          if(min.x > center.x && item.coords.x > min.x)
-           item.coords.x -= GameState.state.width;
-          if(min.y > center.y && item.coords.y > min.y)
-           item.coords.y -= GameState.state.height;
+          fixCoords(item, center, max, min)
 
           var x = item.coords.x - center.x + localCenter.x - 25;
           var y = item.coords.y - center.y + localCenter.y - 25;
@@ -307,15 +298,7 @@ app.directive("game", function (GameState) {
         for (var key in GameState.state.bullets) {
           var item = GameState.state.bullets[key];
 
-          if(max.x < center.x && item.coords.x < max.x)
-           item.coords.x += GameState.state.width;
-          if(max.y < center.y && item.coords.y < max.y)
-           item.coords.y += GameState.state.height;
-
-          if(min.x > center.x && item.coords.x > min.x)
-           item.coords.x -= GameState.state.width;
-          if(min.y > center.y && item.coords.y > min.y)
-           item.coords.y -= GameState.state.height;
+          fixCoords(item, center, max, min)
 
           var x = item.coords.x - center.x + localCenter.x;
           var y = item.coords.y - center.y + localCenter.y;
@@ -326,16 +309,17 @@ app.directive("game", function (GameState) {
         ctx.font = '24pt  "Orbitron"';
         ctx.fillStyle = "rgb(0,100,0)";
         ctx.textAlign="left";
-        ctx.fillText('Players: ' + players, 10 + offset.x, 40 + offset.y);
-        ctx.fillText('Items: ' + items, 10 + offset.x, 80 + offset.y);
-        ctx.fillText('Position: ' + Math.round(center.x) + ", " + Math.round(center.y), 10 + offset.x, 120 + offset.y);
 
         if(me) {
-          ctx.fillText('Speed:  ' + me.velocity, canvas.width - 215 + offset.x, 40 + offset.y);
-          ctx.fillText('Size:  ' + me.size, canvas.width - 215 + offset.x, 80 + offset.y);
-          ctx.fillText('Shield: ' + me.shield, canvas.width - 215 + offset.x, 120 + offset.y);
-          ctx.fillText('Shots: ' + me.bullets, canvas.width - 215 + offset.x, 160 + offset.y);
+          ctx.fillText('Speed:  ' + me.velocity, 10 + offset.x, 40 + offset.y);
+          ctx.fillText('Size:  ' + me.size, 10 + offset.x, 80 + offset.y);
+          ctx.fillText('Shots: ' + me.bullets, 10 + offset.x, 120 + offset.y);
+          if(me.shield > 0)
+            ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
         }
+        ctx.fillText('Players: ' + players, canvas.width - 215 + offset.x, 40 + offset.y);
+        ctx.fillText('Items: ' + items, canvas.width - 215 + offset.x, 80 + offset.y);
+        // ctx.fillText('Position: ' + Math.round(center.x) + ", " + Math.round(center.y), canvas.width - 400 + offset.x, 120 + offset.y);
 
 
         if (!GameState.isAlive && GameState.killedAtLeastOnce) {
