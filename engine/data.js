@@ -12,8 +12,9 @@ var config = {
     velocityDefault: 1,
     shieldDefault: 0,
     bulletRangeInterval: 10,
-    bulletDefaultRange: 500,
-    bulletVelocity: 5,
+    bulletRangeTime: 5000,//for entire map width
+    bulletDefaultRange: undefined, //calculated in map
+    bulletVelocity: undefined,//calculated in map
     bulletsDefault: 4,
 
     sizeDefaultStep: 1,
@@ -46,6 +47,9 @@ function Map(callback) {
     } else {
         this.productAssets = JSON.parse(this.productAssets).products;
     }
+
+    config.bulletDefaultRange = config.bulletRangeTime / config.bulletRangeInterval;
+    config.bulletVelocity = config.mapWidth / config.bulletDefaultRange;
 
     this.productId = 0;
     this.bulletId = 0;
@@ -246,8 +250,8 @@ Map.prototype.shoot = function (playerId, vx, vy) {
     }
 }
 
-Map.prototype.removeBullet = function(id){    
-	delete this.data.bullets[id];
+Map.prototype.removeBullet = function (id) {
+    delete this.data.bullets[id];
 }
 
 Map.prototype.updateBullets = function () {
@@ -277,10 +281,10 @@ Map.prototype.validateBullets = function (inputPlayer) {
         var bullet = this.data.bullets[keyBull];
         for (var i = 0; i < playersKeys.length; i++) {
             var key = playersKeys[i];
-            var player = this.data.players[key];
+            var player = this.data.players[key];            
 
             if (player && bullet.playerId !== key && player.collision(bullet) && player.shield === 0) {
-                this.removePlayer(player.id);                
+                this.removePlayer(player.id);
                 this.removeBullet(bullet.id);
             }
         }
@@ -312,6 +316,7 @@ function Player(id, x, y) {
     Item.call(this, id, x, y);
     this.dx = 0;
     this.dy = 0;
+    this.name = id;
 
     for (var i = 0; i < config.playerAttributes.length; i++) {
         this[config.playerAttributes[i]] = config[config.playerAttributes[i] + "Default"];

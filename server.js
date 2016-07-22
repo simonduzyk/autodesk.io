@@ -34,11 +34,6 @@ app.get('/signin',
     res.sendFile(__dirname + '/login.html');
   });
 
-app.get('/*',
-  function (req, res) {
-    res.sendFile(__dirname + '/login.html');
-  });
-
 app.get('/oauthcallback',
   function (req, res) {
     var body = {
@@ -77,6 +72,11 @@ app.get('/logout',
 
 
 app.use('/engine', new engine(http));
+
+app.get('/*',
+  function (req, res) {
+    res.redirect('/signin');
+});
 
 http.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
