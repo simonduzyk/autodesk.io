@@ -12,7 +12,7 @@ var config = {
     velocityDefault: 1,
     shieldDefault: 0,
     bulletRangeInterval: 10,
-    bulletRangeTime: 5000,//for entire map width
+    bulletRangeTime: 3000,//for entire map width
     bulletDefaultRange: undefined, //calculated in map
     bulletVelocity: undefined,//calculated in map
     bulletsDefault: 4,
@@ -112,17 +112,7 @@ Map.prototype.movePlayer = function (id, dx, dy) {
     if (player) {
         player.move(dx, dy);
 
-        if (player.coords.x < 0)
-            player.coords.x = this.data.width + player.coords.x;
-
-        if (player.coords.x > this.data.width)
-            player.coords.x = player.coords.x - this.data.width;
-
-        if (player.coords.y < 0)
-            player.coords.y = this.data.height + player.coords.y;
-
-        if (player.coords.y > this.data.height)
-            player.coords.y = player.coords.y - this.data.height;
+        this.validateCoords(player.coords);
 
         player.dx = dx;
         player.dy = dy;
@@ -130,6 +120,19 @@ Map.prototype.movePlayer = function (id, dx, dy) {
         this.validatePlayerPosition(player);
         this.validateMap(player);
     }
+}
+Map.prototype.validateCoords = function (coords) {
+    if (coords.x < 0)
+        coords.x = this.data.width + coords.x;
+
+    if (coords.x > this.data.width)
+        coords.x = coords.x - this.data.width;
+
+    if (coords.y < 0)
+        coords.y = this.data.height + coords.y;
+
+    if (coords.y > this.data.height)
+        coords.y = coords.y - this.data.height;
 }
 Map.prototype.setPlayerPosition = function (id, x, y) {
     var player = this.getPlayer(id);
@@ -245,7 +248,7 @@ Map.prototype.shoot = function (playerId, vx, vy) {
     var player = this.getPlayer(playerId);
     if (player && player.bullets > 0) {
         player.bullets--;
-        var bullet = new Bullet(this.bulletId++, player.coords.x, player.coords.y, vx, vy, config.bulletDefaultRange, player.id);
+        var bullet = new Bullet(this.bulletId++, player.coords.x + player.size * vx, player.coords.y + player.size * vy, vx, vy, config.bulletDefaultRange, player.id);
         this.data.bullets[bullet.id] = bullet;
     }
 }
@@ -264,6 +267,7 @@ Map.prototype.updateBullets = function () {
             sendNotify = true;
             bullet.coords.x += bullet.vx * config.bulletVelocity;
             bullet.coords.y += bullet.vy * config.bulletVelocity;
+            this.validateCoords(bullet.coords);
         }
         else {
             this.removeBullet(bullet.id);
@@ -281,14 +285,22 @@ Map.prototype.validateBullets = function (inputPlayer) {
         var bullet = this.data.bullets[keyBull];
         for (var i = 0; i < playersKeys.length; i++) {
             var key = playersKeys[i];
-            var player = this.data.players[key];            
-
-            if (player && bullet.playerId !== key && player.collision(bullet) && player.shield === 0) {
+            var player = this.data.players[key];
+            var prevPoint = new Point(bullet.coords.x - bullet.vx * config.bulletVelocity, bullet.coords.y - bullet.vy * config.bulletVelocity);
+            if (player && bullet.playerId !== key && player.shield === 0 && (player.collision(bullet) || this.isOnLine(prevPoint, bullet.coords, player.coords, bullet.size + player.size))) {
                 this.removePlayer(player.id);
                 this.removeBullet(bullet.id);
             }
         }
     }
+}
+
+Map.prototype.isOnLine = function (pt1, pt2, pt, eps) {
+    var len1 = pt1.distanceTo(pt);
+    var len2 = pt2.distanceTo(pt);
+    var len = pt1.distanceTo(pt2);
+
+    return Math.abs(len1 + len2 - len) < eps;
 }
 
 function Point(x, y) {
@@ -297,6 +309,9 @@ function Point(x, y) {
 }
 Point.prototype.equals = function (pt, eps) {
     return Math.abs(this.x - pt.x) < eps && Math.abs(this.y - pt.y) < eps;
+}
+Point.prototype.distanceTo = function (pt) {
+    return Math.sqrt((pt.x - this.x) * (pt.x - this.x) + (pt.y - this.y) * (pt.y - this.y));
 }
 
 function Item(id, x, y) {
