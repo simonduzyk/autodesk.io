@@ -72,31 +72,17 @@ app.service('GameState', function () {
 
   this.onEaten = function (data) {
     if (data && data.player === that.id) {
-      $('#line1').text('Bonus: ' + that.assets[data.product].name);
-      $('#line2').text(that.assets[data.product].description);
+      var line1 = 'Bonus: ' + that.assets[data.product].name;
+      var line2 = that.assets[data.product].description;
+      var line3;
       var attribute = AttributesDictionary[that.assets[data.product].attribute];
       if(attribute === 'Shield')
-        $('#line3').text(attribute + ' activated.');
+        line3 = attribute + ' activated.';
       else if(attribute === 'Ammo')
-        $('#line3').text(attribute + ' increased by ' + that.assets[data.product].value + '.');
+        line3 = attribute + ' increased by ' + that.assets[data.product].value + '.';
       else
-        $('#line3').text(attribute + ' increased.');
-        
-
-      if (that.balloons == 0) {
-        var canvas = document.getElementById('canvas');
-        var baloon = $('#balloon'); 
-        baloon.animate({ top: canvas.height - baloon.height() }, 500);
-      }
-      that.balloons += 1;
-      setTimeout(function () {
-        that.balloons -= 1;
-        if (that.balloons == 0) {
-          var canvas = document.getElementById('canvas');
-          var baloon = $('#balloon'); 
-          $('#balloon').animate({ top: canvas.height }, 200);
-        }
-      }, 3000);
+        line3 = attribute + ' increased.';
+      that.showBaloon(line1, line2, line3);
     }
   }
 
