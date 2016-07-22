@@ -22,6 +22,8 @@ var config = {
     velocityDefaultStep: 0.1,
     shieldDefaultStep: 1,
     bulletsDefaultStep: 1,
+    sizeHitCount: 10,
+    sizeMin: 20,
 
     sizeMaxValue: 100,
     velocityMaxValue: 5,
@@ -176,7 +178,7 @@ Map.prototype.playerVsPlayer = function (player1, player2) {
         var attacker = (player1.size > player2.size) ? player1 : player2;
         var prey = (player1.size > player2.size) ? player2 : player1;
         if (prey.shield === 0) {
-            attacker.size += prey.size;
+            attacker.size += prey.size;            
             this.removePlayer(prey.id);
         }
     }
@@ -299,8 +301,12 @@ Map.prototype.validateBullets = function (inputPlayer) {
             var player = this.data.players[key];
             var prevPoint = new Point(bullet.coords.x - bullet.vx * config.bulletVelocity, bullet.coords.y - bullet.vy * config.bulletVelocity);
             if (player && bullet.playerId !== key && player.shield === 0 && (player.collision(bullet) || this.isOnLine(prevPoint, bullet.coords, player.coords, bullet.size + player.size))) {
-                this.removePlayer(player.id);
-                this.removeBullet(bullet.id);
+                player.size -= config.sizeHitCount;
+
+                if(player.size < config.sizeMin){
+                    this.removePlayer(player.id);
+                }
+                this.removeBullet(bullet.id);                
             }
         }
     }
