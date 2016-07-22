@@ -179,7 +179,7 @@ Map.prototype.playerVsPlayer = function (player1, player2) {
         var prey = (player1.size > player2.size) ? player2 : player1;
         if (prey.shield === 0) {
             attacker.size += prey.size;        
-            if(attacker.size > configh.sizeMaxValue)
+            if(attacker.size > config.sizeMaxValue)
               attacker.size = config.sizeMaxValue;    
             this.removePlayer(prey.id);
         }
