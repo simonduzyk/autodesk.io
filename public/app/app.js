@@ -1,6 +1,12 @@
 var app = angular.module("autodeskio", []);
 var socket = io();
 
+var AttributesDictionary = {
+  bullets: 'Bullets',
+  size: 'Size',
+  velocity: 'Speed'
+}
+
 app.service('GameState', function () {
   this.id = '';
   this.state = {};
@@ -30,7 +36,9 @@ app.service('GameState', function () {
 
   this.onEaten = function (data) {
     if (data && data.player === that.id) {
-      $("#balloon").text('Eaten: ' + that.assets[data.product].description);
+      $('#line1').text('Bonus: ' + that.assets[data.product].name);
+      $('#line2').text(that.assets[data.product].description);
+      $('#line3').text(AttributesDictionary[that.assets[data.product].attribute] + ' increased: ' + that.assets[data.product].value);
       if (that.balloons == 0) {
         var canvas = document.getElementById('canvas');
         var baloon = $('#balloon'); 
