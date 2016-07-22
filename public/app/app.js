@@ -262,9 +262,21 @@ app.directive("game", function (GameState) {
       function drawBullet(x, y) {
         drawCircle(x, y, 10, 'red', 2);
       }
-      function drawAmmoGrid(ammoCount) {
-        // ammo = ammoCount
-        // drawCircle
+      var MAX_AMMO = 14;
+      var AMMO_ROW = MAX_AMMO/2;
+      function drawAmmoGrid(ammoCount, offset) {
+        
+        ammo = ammoCount > MAX_AMMO ? MAX_AMMO : ammoCount;
+        var yOffset = 111 + offset.y;
+        if(ammo > AMMO_ROW) {
+          yOffset -= 10;
+        }
+        for(var i = 0; i < ammo; i++) {      
+          drawCircle(150 + offset.x + (i%AMMO_ROW)*15, yOffset, 6, '#fdfd22', 1);
+          if(i == (AMMO_ROW - 1))
+            yOffset += 20;
+
+        }
       }
       function fixCoords(item, center, max, min) {
           if(max.x < center.x && item.coords.x < max.x)
@@ -379,7 +391,7 @@ app.directive("game", function (GameState) {
           drawRect(145 + offset.x, 60 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
           var speed = me.velocity*20;
           drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
-          drawAmmoGrid(me.bullets);
+          drawAmmoGrid(me.bullets, offset);
           ctx.beginPath();
           ctx.font = '24pt  "Orbitron"';
           ctx.fillStyle = "rgb(0,200,0)";
