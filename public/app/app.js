@@ -34,6 +34,41 @@ app.service('GameState', function () {
 
   this.balloons = 0;
 
+  this.showBaloon = function (line1, line2, line3) {
+      $('#line1').text(line1 || '');
+      $('#line2').text(line2 || '');
+      $('#line3').text(line3 || '');
+      if (that.balloons == 0) {
+        var canvas = document.getElementById('canvas');
+        var baloon = $('#balloon'); 
+        baloon.animate({ top: canvas.height - baloon.height() }, 500);
+      }
+      that.balloons += 1;
+      setTimeout(function () {
+        that.balloons -= 1;
+        if (that.balloons == 0) {
+          var canvas = document.getElementById('canvas');
+          var baloon = $('#balloon'); 
+          $('#balloon').animate({ top: canvas.height }, 200);
+        }
+      }, 3000);
+  }
+
+  this.onUserDeleted = function (user) {
+    that.showBaloon('Player killed:', user.name);
+    console.log(user);
+  }
+
+  this.onUserJoined = function (user) {
+    that.showBaloon('Player joined:', user.name);
+    console.log(user);
+  }
+
+  this.onUserLeft = function (user) {
+    that.showBaloon('Player left:', user.name);
+    console.log(user);
+  }
+
   this.onEaten = function (data) {
     if (data && data.player === that.id) {
       $('#line1').text('Bonus: ' + that.assets[data.product].name);
@@ -77,6 +112,9 @@ app.service('GameState', function () {
     that.assets = Array.prototype.slice.call(arguments[0]);
     that.loadAssetsCallback();
   });
+  socket.on('player-delete', this.onUserDeleted);
+  socket.on('player-left', this.onUserLeft);
+  socket.on('player-joined', this.onUserJoined);
   socket.on('product-eaten', this.onEaten);
   socket.on('game-over', function () {
     that.killedAtLeastOnce = true;
