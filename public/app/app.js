@@ -248,6 +248,10 @@ app.directive("game", function (GameState) {
       function drawBullet(x, y) {
         drawCircle(x, y, 10, 'red', 2);
       }
+      function drawAmmoGrid(ammoCount) {
+        // ammo = ammoCount
+        // drawCircle
+      }
       function fixCoords(item, center, max, min) {
           if(max.x < center.x && item.coords.x < max.x)
            item.coords.x += GameState.state.width;
@@ -352,28 +356,23 @@ app.directive("game", function (GameState) {
         // if(me && me.shield > 0)
         //   rectHeight += 40;
 
-                ctx.beginPath();
-        drawRect(-3 + offset.x, -3 + offset.y, 280, rectHeight, "rgba(0, 0, 0, 0.6)", 5);
-        drawRect(145 + offset.x, 19 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
-        var health = 0;
-        if(me)
-          health = me.size;
-        drawRect(145 + offset.x, 19 + offset.y, health, 20, "rgba(150, 0, 0, 1)", 0);
-        drawRect(145 + offset.x, 60 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
-        var speed = 0;
-        if(me)
-          speed = me.velocity*20;
-        drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
-
-
-        ctx.font = '24pt  "Orbitron"';
-        ctx.fillStyle = "rgb(0,200,0)";
-        ctx.textAlign="left";
 
         if(me) {
+          drawRect(-3 + offset.x, -3 + offset.y, 280, rectHeight, "rgba(0, 0, 0, 0.6)", 5);
+          drawRect(145 + offset.x, 19 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
+          var health = me.size;
+          drawRect(145 + offset.x, 19 + offset.y, health, 20, "rgba(150, 0, 0, 1)", 0);
+          drawRect(145 + offset.x, 60 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
+          var speed = me.velocity*20;
+          drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
+          drawAmmoGrid(me.bullets);
+          ctx.beginPath();
+          ctx.font = '24pt  "Orbitron"';
+          ctx.fillStyle = "rgb(0,200,0)";
+          ctx.textAlign="left";
           ctx.fillText('Health:  ', 10 + offset.x, 40 + offset.y);
           ctx.fillText('Speed:  ', 10 + offset.x, 80 + offset.y);
-          ctx.fillText('Ammo: ' + me.bullets, 10 + offset.x, 120 + offset.y);
+          ctx.fillText('Ammo: ', 10 + offset.x, 120 + offset.y);
           // if(me.shield > 0)
           //   ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
         }
