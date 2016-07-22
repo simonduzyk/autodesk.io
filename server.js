@@ -11,12 +11,7 @@ var util = require('./lib/utility');
 app.set('port', (process.env.PORT || 80));
 
 app.use(express.static(__dirname + '/public'));
-app.use(session({ secret: 'imr8k793jd73k6' }));
-
-
-//// views is directory for all template files
-//app.set('views', __dirname + '/views');
-//app.set('view engine', 'ejs');
+app.use(session({ secret: 'imr8k793jd73k6', saveUninitialized: true, resave: false }));
 
 app.get('/', util.checkUser, function(request, response) {
   response.sendFile(__dirname + '/index.html');
@@ -34,6 +29,15 @@ app.get('/login',
     //res.render('login', { autodeskurl: url , githuburl: '/oauth/github'});
   });
 
+app.get('/signin',
+  function (req, res) {
+    res.sendFile(__dirname + '/login.html');
+  });
+
+app.get('/*',
+  function (req, res) {
+    res.sendFile(__dirname + '/login.html');
+  });
 
 app.get('/oauthcallback',
   function (req, res) {
