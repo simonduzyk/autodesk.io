@@ -5,7 +5,7 @@
             "img" : "3ds_Max_",
             "description" : "Create amazing worlds in 3ds Max",
             "attribute": "size",
-            "value": 2
+            "value": 5
         },
         {
             "name" : "AUTOCAD ARCHITECTURE",
@@ -19,7 +19,7 @@
             "img" : "Dynamo_Studio_",
             "description" : "Computational BIM design software",
             "attribute": "size",
-            "value": 3
+            "value": 5
         },
         {
             "name" : "FUSION 360",
@@ -47,7 +47,7 @@
             "img" : "Revit_",
             "description" : "Design without compromise",
             "attribute": "size",
-            "value": 4
+            "value": 10
         },
         {
             "name" : "SIMSTUDIO TOOLS",
