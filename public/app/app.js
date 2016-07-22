@@ -222,7 +222,7 @@ app.directive("game", function (GameState) {
         ctx.strokeStyle = '#000000';
         ctx.stroke();
       }
-      function drawUser(centerx, centery, size, color, shield, offset, dirx, diry) {
+      function drawUser(centerx, centery, size, color, shield, offset, dirx, diry, name) {
         drawCircle(centerx, centery, size, color, 5);
 
         ctx.beginPath();
@@ -246,6 +246,10 @@ app.directive("game", function (GameState) {
           var shColor = "rgba(70, 200, 200,"+ shieldPower + ")";
           drawCircle(centerx, centery, size + size * 0.4, shColor, 0);
         }
+        ctx.textAlign="center";
+        ctx.font = '12pt  "Orbitron"';
+        ctx.fillStyle = "green";
+        ctx.fillText(name, centerx, centery - size -20);
       }
 
       function drawBullet(x, y) {
@@ -342,8 +346,11 @@ app.directive("game", function (GameState) {
           var x = player.coords.x - center.x + localCenter.x;
           var y = player.coords.y - center.y + localCenter.y;
           //var dir = GameState.direction;
-          
-          drawUser(x, y, player.size, player.color, player.shield, offset, player.dx, player.dy);
+          var playerName = "";
+          if(me.id !== player.id) {
+            playerName = player.name;
+          }
+          drawUser(x, y, player.size, player.color, player.shield, offset, player.dx, player.dy, playerName);
         }
 
         for (var key in GameState.state.products) {
@@ -379,6 +386,7 @@ app.directive("game", function (GameState) {
           var speed = me.velocity*20;
           drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
           drawAmmoGrid(me.bullets, offset);
+          
         }
         ctx.font = '24pt  "Orbitron"';
         ctx.fillStyle = "#47d147";
@@ -390,6 +398,7 @@ app.directive("game", function (GameState) {
           ctx.fillText('Health:  ', 10 + offset.x, 40 + offset.y);
           ctx.fillText('Speed:  ', 10 + offset.x, 80 + offset.y);
           ctx.fillText('Ammo: ', 10 + offset.x, 120 + offset.y);
+
           // if(me.shield > 0)
           //   ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
         }
