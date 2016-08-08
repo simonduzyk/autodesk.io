@@ -5,13 +5,14 @@ var config = {
     mapWidth: 128 * 20,
     productsMaxCount: 10,
     productsOnStart: 10,
+    timeForFullWidth: 10000,
+    updateInterval: 20,
 
     playerAttributes: ["size", "shield", "velocity"],
 
     sizeDefault: 40,
     velocityDefault: 2,
     shieldDefault: 0,
-    bulletRangeInterval: 10,
     bulletRangeTime: 3000,//for entire map width
     bulletDefaultRange: undefined, //calculated in map
     bulletVelocity: undefined,//calculated in map
@@ -57,8 +58,8 @@ function Map(callback) {
         this.productAssets = JSON.parse(this.productAssets).products;
     }
 
-    config.bulletDefaultRange = config.bulletRangeTime / config.bulletRangeInterval;
-    config.bulletVelocity = config.mapWidth / config.bulletDefaultRange;
+    config.bulletDefaultRange = config.bulletRangeTime / config.updateInterval;
+    config.bulletVelocity = 2*config.mapWidth / config.bulletDefaultRange;
 
     this.productId = 0;
     this.bulletId = 0;
@@ -72,9 +73,10 @@ function Map(callback) {
     }.bind(this), config.productInterval);
 
     setInterval(function () {
+        this.updatePlayers();
         this.updateBullets();
-        this.validateBullets();
-    }.bind(this), config.bulletRangeInterval);
+        this.validateMap();
+    }.bind(this), config.updateInterval);
     this.callback = callback;
 }
 Map.prototype.addProduct = function (product) {
@@ -120,15 +122,23 @@ Map.prototype.validatePlayerPosition = function (player) {
 Map.prototype.movePlayer = function (id, dx, dy) {
     var player = this.getPlayer(id);
     if (player) {
-        player.move(dx, dy);
+        var len = Math.sqrt(dx * dx + dy * dy);
+
+        player.dx = dx / len;
+        player.dy = dy / len;
+    }
+}
+Map.prototype.updatePlayers = function () {
+    var speed = config.updateInterval * config.mapWidth / config.timeForFullWidth;
+    for (var key in this.data.players) {
+        var player = this.data.players[key];
+
+        var speedPlayer = speed * Math.sqrt(player.velocity)
+        player.coords.x += player.dx * speedPlayer;
+        player.coords.y += player.dy * speedPlayer;
 
         this.validateCoords(player.coords);
-
-        player.dx = dx;
-        player.dy = dy;
-
         this.validatePlayerPosition(player);
-        this.validateMap(player);
     }
 }
 Map.prototype.validateCoords = function (coords) {
@@ -179,6 +189,7 @@ Map.prototype.generateProduct = function () {
     return false;
 }
 Map.prototype.validateMap = function (player) {
+    this.validateBullets(player);
     this.validateProducts(player);
     this.validatePlayers(player);
 }
@@ -188,7 +199,7 @@ Map.prototype.playerVsPlayer = function (player1, player2) {
         var attacker = (player1.size > player2.size) ? player1 : player2;
         var prey = (player1.size > player2.size) ? player2 : player1;
         if (prey.shield === 0) {
-            attacker.size += prey.size/2;
+            attacker.size += prey.size / 2;
             if (attacker.size > config.sizeMaxValue)
                 attacker.size = config.sizeMaxValue;
             this.removePlayer(prey.id);
