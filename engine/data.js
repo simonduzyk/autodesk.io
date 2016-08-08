@@ -76,6 +76,7 @@ function Map(callback) {
         this.updatePlayers();
         this.updateBullets();
         this.validateMap();
+        this.notify("updated");
     }.bind(this), config.updateInterval);
     this.callback = callback;
 }

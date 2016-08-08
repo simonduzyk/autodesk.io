@@ -88,16 +88,23 @@ app.service('GameState', function () {
       that.showBaloon(line1, line2, line3);
     }
   }
-
+  var dxNorm = 0; 
+  var dyNorm = 0; 
   this.movePlayer = function() {
     var dx = that.mousePosition.x - canvas.width / 2;
     var dy = that.mousePosition.y - canvas.height / 2;
     var l = Math.sqrt(dx*dx + dy*dy);
-    var dxNorm = dx/l; 
-    var dyNorm = dy/l; 
-    that.direction.x = dxNorm;
-    that.direction.y = dyNorm;
-    socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
+    if(l > 0) {
+      var newDxNorm = dx/l; 
+      var newDyNorm = dy/l;
+      if(newDxNorm !== dxNorm || newDyNorm != dyNorm) {  
+        that.direction.x = dxNorm;
+        that.direction.y = dyNorm;
+        socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
+        dxNorm = newDxNorm;
+        dyNorm = newDyNorm;
+      }
+    }
     setTimeout(that.movePlayer, 25);
   }
   this.shoot = function(vx, vy) {
