@@ -14,49 +14,73 @@ app.service('GameState', function () {
   this.isAlive = false;
   this.killedAtLeastOnce = false;
   var that = this;
-  this.mousePosition = {x:0, y:0};
+  this.mousePosition = { x: 0, y: 0 };
   this.assets = [];
   this.loadAssetsCallback;
   this.playerVelocity = 1;
   this.direction = {};
-  
-  this.setDraw = function(draw) {
+  this.spectatorName = undefined;
+
+  this.setDraw = function (draw) {
     this.draw = draw;
   }
 
   this.onChange = function (state) {
     that.state = state;
+
+    if (spectator && that.id === '') {
+      if (that.spectatorName) {
+        for(var key in state.players){
+          if(state.players[key].name === that.spectatorName){
+            that.id = state.players[key].id;
+            break;
+          }
+        }
+      } else {
+        var keys = Object.keys(state.players);
+        if (keys.length > 0)
+          that.id = state.players[keys[0]].id;
+      }
+    }
+
     that.draw();
   }
 
   this.onYourId = function (id) {
+    if (spectator)
+      return;
     that.id = id;
   }
 
   this.balloons = 0;
 
   this.showBaloon = function (line1, line2, line3) {
-      $('#line1').text(line1 || '');
-      $('#line2').text(line2 || '');
-      $('#line3').text(line3 || '');
+    $('#line1').text(line1 || '');
+    $('#line2').text(line2 || '');
+    $('#line3').text(line3 || '');
+    if (that.balloons == 0) {
+      var canvas = document.getElementById('canvas');
+      var baloon = $('#balloon');
+      baloon.animate({ top: canvas.height - baloon.height() }, 500);
+    }
+    that.balloons += 1;
+    setTimeout(function () {
+      that.balloons -= 1;
       if (that.balloons == 0) {
         var canvas = document.getElementById('canvas');
-        var baloon = $('#balloon'); 
-        baloon.animate({ top: canvas.height - baloon.height() }, 500);
+        var baloon = $('#balloon');
+        $('#balloon').animate({ top: canvas.height }, 200);
       }
-      that.balloons += 1;
-      setTimeout(function () {
-        that.balloons -= 1;
-        if (that.balloons == 0) {
-          var canvas = document.getElementById('canvas');
-          var baloon = $('#balloon'); 
-          $('#balloon').animate({ top: canvas.height }, 200);
-        }
-      }, 3000);
+    }, 3000);
   }
 
   this.onUserDeleted = function (user) {
     if (user) {
+
+      if (spectator && user.id === that.id) {
+        that.id = '';
+      }
+
       that.showBaloon('Player killed:', user.name);
     }
   }
@@ -69,6 +93,11 @@ app.service('GameState', function () {
 
   this.onUserLeft = function (user) {
     if (user) {
+
+      if (spectator && user.id === that.id) {
+        that.id = '';
+      }
+
       that.showBaloon('Player left:', user.name);
     }
   }
@@ -79,36 +108,40 @@ app.service('GameState', function () {
       var line2 = that.assets[data.product].description;
       var line3;
       var attribute = AttributesDictionary[that.assets[data.product].attribute];
-      if(attribute === 'Shield')
+      if (attribute === 'Shield')
         line3 = attribute + ' activated.';
-      else if(attribute === 'Ammo')
+      else if (attribute === 'Ammo')
         line3 = attribute + ' increased by ' + that.assets[data.product].value + '.';
       else
         line3 = attribute + ' increased.';
       that.showBaloon(line1, line2, line3);
     }
   }
-  var dxNorm = 0; 
-  var dyNorm = 0; 
-  this.movePlayer = function() {
+  var dxNorm = 0;
+  var dyNorm = 0;
+  this.movePlayer = function () {
+    if (spectator)
+      return;
     var dx = that.mousePosition.x - canvas.width / 2;
     var dy = that.mousePosition.y - canvas.height / 2;
-    var l = Math.sqrt(dx*dx + dy*dy);
-    if(l > 0) {
-      var newDxNorm = dx/l; 
-      var newDyNorm = dy/l;
-      if(newDxNorm !== dxNorm || newDyNorm != dyNorm) {  
+    var l = Math.sqrt(dx * dx + dy * dy);
+    if (l > 0) {
+      var newDxNorm = dx / l;
+      var newDyNorm = dy / l;
+      if (newDxNorm !== dxNorm || newDyNorm != dyNorm) {
         that.direction.x = dxNorm;
         that.direction.y = dyNorm;
-        socket.emit('moved', {dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm* 5 * Math.sqrt(that.playerVelocity)});
+        socket.emit('moved', { dx: dxNorm * 5 * Math.sqrt(that.playerVelocity), dy: dyNorm * 5 * Math.sqrt(that.playerVelocity) });
         dxNorm = newDxNorm;
         dyNorm = newDyNorm;
       }
     }
     setTimeout(that.movePlayer, 25);
   }
-  this.shoot = function(vx, vy) {
-    socket.emit('shoot', {vx: vx, vy: vy});
+  this.shoot = function (vx, vy) {
+    if (spectator)
+      return;
+    socket.emit('shoot', { vx: vx, vy: vy });
   }
   this.movePlayer();
   socket.on('change', this.onChange);
@@ -122,6 +155,9 @@ app.service('GameState', function () {
   socket.on('player-joined', this.onUserJoined);
   socket.on('product-eaten', this.onEaten);
   socket.on('game-over', function () {
+    if (spectator)
+      return;
+
     that.killedAtLeastOnce = true;
     that.draw();
   });
@@ -133,7 +169,7 @@ app.directive("game", function (GameState) {
     link: function (scope, element) {
       var canvas = element[0];
       GameState.setDraw(draw);
-      var localCenter = {x: 0, y: 0};
+      var localCenter = { x: 0, y: 0 };
 
       window.onload = showViewport;
       window.onresize = showViewport;
@@ -141,12 +177,12 @@ app.directive("game", function (GameState) {
       var ctx = canvas.getContext('2d');
       var img = new Image();
       img.src = 'assets/background.jpg';
-      backgroundTile = {width:0, height:0};
+      backgroundTile = { width: 0, height: 0 };
       var productImages = [];
-      
-      var loadProductImages = function() {
-        for(var i = 0; i < GameState.assets.length; i++) {
-          productImages.push( new Image());
+
+      var loadProductImages = function () {
+        for (var i = 0; i < GameState.assets.length; i++) {
+          productImages.push(new Image());
           productImages[i].src = 'assets/' + GameState.assets[i].img + '50.png';
         }
       }
@@ -159,10 +195,10 @@ app.directive("game", function (GameState) {
         backgroundTile.height = this.height;
         draw();
       }
-      var getOffset = function(offset) {
+      var getOffset = function (offset) {
         return {
-          x: offset.x%backgroundTile.width,
-          y: offset.y%backgroundTile.height
+          x: offset.x % backgroundTile.width,
+          y: offset.y % backgroundTile.height
         }
       }
 
@@ -193,27 +229,28 @@ app.directive("game", function (GameState) {
           currentX = event.layerX - event.currentTarget.offsetLeft;
           currentY = event.layerY - event.currentTarget.offsetTop;
         }
-        GameState.mousePosition = {x: currentX, y: currentY};
+        GameState.mousePosition = { x: currentX, y: currentY };
       });
       element.bind('mouseup', function (event) {
         if (!GameState.isAlive) {
-          socket.emit('restart');
+          if(!spectator)
+            socket.emit('restart');
         }
-        else if(bullets > 0){//shoot
+        else if (bullets > 0) {//shoot
           var dir = GameState.direction;
-          if('x' in dir) {
+          if ('x' in dir) {
             GameState.shoot(dir.x, dir.y);
-            bullets --;
+            bullets--;
           }
         }
         draw();
       });
-      function drawCircle (centerx, centery, size, color, lineWidth) {
+      function drawCircle(centerx, centery, size, color, lineWidth) {
         ctx.beginPath();
         ctx.arc(centerx, centery, size, 0, 2 * Math.PI, false);
         ctx.fillStyle = color;
         ctx.fill();
-        if(lineWidth > 0) {
+        if (lineWidth > 0) {
           ctx.lineWidth = lineWidth;
           ctx.strokeStyle = '#000000';
           ctx.stroke();
@@ -222,7 +259,7 @@ app.directive("game", function (GameState) {
       function drawRect(x, y, width, height, color, lineWidth) {
         ctx.beginPath();
         ctx.rect(x, y, width, height);
-        
+
         ctx.fillStyle = color;
         ctx.fill();
         ctx.lineWidth = lineWidth;
@@ -234,60 +271,60 @@ app.directive("game", function (GameState) {
 
         ctx.beginPath();
 
-        ctx.translate( centerx, centery);
+        ctx.translate(centerx, centery);
         var rot = Math.atan2(dirx, diry);
-        ctx.rotate(-rot +Math.PI/2);
-        ctx.rect(0, -5, size + 0.3*size, 11);
+        ctx.rotate(-rot + Math.PI / 2);
+        ctx.rect(0, -5, size + 0.3 * size, 11);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(-offset.x, -offset.y);
-        
+
         ctx.fillStyle = color;
         ctx.fill();
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#000000';
         ctx.stroke();
 
-        if(shield > 0) {
+        if (shield > 0) {
           var shieldPower = (shield > 5) ? 0.5 : shield * 0.1;
           shieldPower += 0.2;
-          var shColor = "rgba(70, 200, 200,"+ shieldPower + ")";
+          var shColor = "rgba(70, 200, 200," + shieldPower + ")";
           drawCircle(centerx, centery, size + size * 0.4, shColor, 0);
         }
-        ctx.textAlign="center";
+        ctx.textAlign = "center";
         ctx.font = '12pt  "Orbitron"';
         ctx.fillStyle = "green";
-        ctx.fillText(name, centerx, centery - size -20);
+        ctx.fillText(name, centerx, centery - size - 20);
       }
 
       function drawBullet(x, y) {
         drawCircle(x, y, 10, 'red', 2);
       }
       var MAX_AMMO = 14;
-      var AMMO_ROW = MAX_AMMO/2;
+      var AMMO_ROW = MAX_AMMO / 2;
       function drawAmmoGrid(ammoCount, offset) {
-        
+
         ammo = ammoCount > MAX_AMMO ? MAX_AMMO : ammoCount;
         var yOffset = 111 + offset.y;
-        if(ammo > AMMO_ROW) {
+        if (ammo > AMMO_ROW) {
           yOffset -= 11;
         }
-        for(var i = 0; i < ammo; i++) {      
-          drawCircle(150 + offset.x + (i%AMMO_ROW)*15, yOffset, 6, '#fdfd22', 1);
-          if(i == (AMMO_ROW - 1))
+        for (var i = 0; i < ammo; i++) {
+          drawCircle(150 + offset.x + (i % AMMO_ROW) * 15, yOffset, 6, '#fdfd22', 1);
+          if (i == (AMMO_ROW - 1))
             yOffset += 20;
 
         }
       }
       function fixCoords(item, center, max, min) {
-          if(max.x < center.x && item.coords.x < max.x)
-           item.coords.x += GameState.state.width;
-          if(max.y < center.y && item.coords.y < max.y)
-           item.coords.y += GameState.state.height;
+        if (max.x < center.x && item.coords.x < max.x)
+          item.coords.x += GameState.state.width;
+        if (max.y < center.y && item.coords.y < max.y)
+          item.coords.y += GameState.state.height;
 
-          if(min.x > center.x && item.coords.x > min.x)
-           item.coords.x -= GameState.state.width;
-          if(min.y > center.y && item.coords.y > min.y)
-           item.coords.y -= GameState.state.height;
+        if (min.x > center.x && item.coords.x > min.x)
+          item.coords.x -= GameState.state.width;
+        if (min.y > center.y && item.coords.y > min.y)
+          item.coords.y -= GameState.state.height;
       }
 
       function draw() {
@@ -341,7 +378,7 @@ app.directive("game", function (GameState) {
 
         drawBackground(canvas.width, canvas.height, offset);
 
-        localCenter = { x: canvas.width / 2 + offset.x, y: canvas.height / 2 + offset.y};
+        localCenter = { x: canvas.width / 2 + offset.x, y: canvas.height / 2 + offset.y };
         var players = 0;
         var items = 0;
         for (var key in GameState.state.players) {
@@ -354,7 +391,7 @@ app.directive("game", function (GameState) {
           var y = player.coords.y - center.y + localCenter.y;
           //var dir = GameState.direction;
           var playerName = "";
-          if(me && (me.id !== player.id)) {
+          if (me && (me.id !== player.id)) {
             playerName = player.name;
           }
           drawUser(x, y, player.size, player.color, player.shield, offset, player.dx, player.dy, playerName);
@@ -380,27 +417,27 @@ app.directive("game", function (GameState) {
           var y = item.coords.y - center.y + localCenter.y;
           drawBullet(x, y);
         }
-        
+
         var rectHeight = 135;
 
         drawRect(canvas.width - 200 + offset.x, -3 + offset.y, 220, rectHeight - 40, "rgba(0, 0, 0, 0.6)", 5);
-        if(me) {
+        if (me) {
           drawRect(-3 + offset.x, -3 + offset.y, 280, rectHeight, "rgba(0, 0, 0, 0.6)", 5);
           drawRect(145 + offset.x, 19 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
           var health = me.size;
           drawRect(145 + offset.x, 19 + offset.y, health, 20, "rgba(150, 0, 0, 1)", 0);
           drawRect(145 + offset.x, 60 + offset.y, 100, 20, "rgba(0, 0, 0, 1)", 2);
-          var speed = me.velocity*20;
+          var speed = me.velocity * 20;
           drawRect(145 + offset.x, 60 + offset.y, speed, 20, "rgba(0, 125, 200, 1)", 0);
           drawAmmoGrid(me.bullets, offset);
-          
+
         }
         ctx.font = '24pt  "Orbitron"';
         ctx.fillStyle = "#47d147";
-        ctx.textAlign="left";
+        ctx.textAlign = "left";
         ctx.fillText('Players: ' + players, canvas.width - 190 + offset.x, 40 + offset.y);
         ctx.fillText('Items: ' + items, canvas.width - 190 + offset.x, 80 + offset.y);
-        if(me) {
+        if (me) {
           ctx.beginPath();
           ctx.fillText('Health:  ', 10 + offset.x, 40 + offset.y);
           ctx.fillText('Speed:  ', 10 + offset.x, 80 + offset.y);
@@ -409,21 +446,25 @@ app.directive("game", function (GameState) {
           // if(me.shield > 0)
           //   ctx.fillText('Shield active', 10 + offset.x, 160 + offset.y);
         }
-        
+
         // ctx.fillText('Position: ' + Math.round(center.x) + ", " + Math.round(center.y), canvas.width - 400 + offset.x, 120 + offset.y);
 
 
         if (!GameState.isAlive && GameState.killedAtLeastOnce) {
           ctx.font = '44pt "Orbitron"';
-          ctx.textAlign="center";
+          ctx.textAlign = "center";
           ctx.fillStyle = "red";
           ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 40);
         }
         if (!GameState.isAlive) {
           ctx.font = '44pt "Orbitron"';
-          ctx.textAlign="center";
+          ctx.textAlign = "center";
           ctx.fillStyle = "green";
-          ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
+          if(spectator){
+            ctx.fillText('Waiting for player', canvas.width / 2, canvas.height / 2 + 40);
+          } else {
+            ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2 + 40);
+          }
         }
       }
 
@@ -432,4 +473,19 @@ app.directive("game", function (GameState) {
 });
 
 app.controller('MainController', ['GameState', function (GameState) {
+  var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+      sURLVariables = sPageURL.split('&'),
+      sParameterName,
+      i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+      sParameterName = sURLVariables[i].split('=');
+
+      if (sParameterName[0] === sParam) {
+        return sParameterName[1] === undefined ? true : sParameterName[1];
+      }
+    }
+  };
+  GameState.spectatorName = getUrlParameter('name');
 }]);

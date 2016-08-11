@@ -13,7 +13,7 @@ var config = {
     sizeDefault: 40,
     velocityDefault: 2,
     shieldDefault: 0,
-    bulletRangeTime: 3000,//for entire map width
+    bulletRangeTime: 1500,//for entire map width
     bulletDefaultRange: undefined, //calculated in map
     bulletVelocity: undefined,//calculated in map
     bulletsDefault: 5,
@@ -59,7 +59,7 @@ function Map(callback) {
     }
 
     config.bulletDefaultRange = config.bulletRangeTime / config.updateInterval;
-    config.bulletVelocity = 2*config.mapWidth / config.bulletDefaultRange;
+    config.bulletVelocity = config.mapWidth / config.bulletDefaultRange;
 
     this.productId = 0;
     this.bulletId = 0;
